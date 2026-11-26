@@ -1,0 +1,411 @@
+<title>Who Is It? Kid Mode</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700..800&display=swap">
+<style>
+/* Layout: one-screen app. Question on top, photos fill the middle, nothing else on screen.
+   Kid mode keeps one calm light look on purpose, whatever the tablet's theme, so the screen is always the same for him. */
+:root {
+  --bg: #EEF3F5;
+  --card: #FFFFFF;
+  --ink: #1B2530;
+  --muted: #6A7684;
+  --rule: #CBD6DE;
+  --accent: #2A7695;
+  --accent-ink: #FFFFFF;
+  --help: #E0A030;
+  --ok: #2E8A57;
+  --veil: #EEF3F5;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+.shell { height: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; box-sizing: border-box; }
+.demo { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding-block: 8px; font-size: 0.85rem; color: var(--muted); border-bottom: 1px dashed var(--rule); }
+.demo select { font: inherit; font-weight: 700; color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-radius: 8px; min-height: 34px; padding: 0 8px; }
+.demo b { color: var(--ink); }
+.stage { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+#screen { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-block: 10px 16px; }
+
+.lock { position: absolute; top: 8px; right: 0; width: 48px; height: 48px; border: 0; padding: 0; background: transparent; color: var(--muted); cursor: pointer; z-index: 5; touch-action: none; }
+.lock svg { width: 48px; height: 48px; display: block; }
+.lock .ring { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 126; stroke-dashoffset: 126; transform: rotate(-90deg); transform-origin: 24px 24px; }
+.lock.holding .ring { stroke-dashoffset: 0; transition: stroke-dashoffset 2s linear; }
+.lock:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 50%; }
+
+.dots { display: flex; gap: 8px; justify-content: center; padding-top: 18px; min-height: 14px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--rule); }
+.dots i.done { background: var(--accent); }
+.dots i.now { background: var(--card); box-shadow: inset 0 0 0 3px var(--accent); }
+
+.question { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 14px 0 4px; }
+.speak { width: 58px; height: 58px; flex: none; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; }
+.speak svg { width: 28px; height: 28px; }
+.speak:focus-visible, .card:focus-visible, .face:focus-visible, .play:focus-visible, .pbtn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.qtext { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 1rem + 3vw, 3rem); line-height: 1.1; text-wrap: balance; }
+.ack-line { text-align: center; font-weight: 700; font-size: 1.25rem; color: var(--ok); min-height: 1.9rem; margin: 2px 0 6px; }
+.ack-line[data-show="false"] { visibility: hidden; }
+
+.content { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.choices { width: 100%; display: flex; align-items: center; justify-content: center; gap: clamp(12px, 3vw, 36px); }
+.card {
+  flex: 1 1 0; min-width: 0; max-width: min(440px, calc((100vh - 300px) * 1.3333));
+  aspect-ratio: 4 / 3; padding: 10px; border: 0; border-radius: 26px; background: var(--card);
+  box-shadow: 0 2px 10px rgba(27, 37, 48, 0.1); cursor: pointer; position: relative; box-sizing: border-box;
+  transition: transform 0.4s ease, opacity 0.4s ease, box-shadow 0.4s ease;
+}
+@supports (height: 100dvh) { .card { max-width: min(440px, calc((100dvh - 300px) * 1.3333)); } }
+.card svg { width: 100%; height: 100%; display: block; border-radius: 17px; }
+.helping .card { opacity: 0.45; }
+.helping .card.answer, .acked .card.answer { opacity: 1; transform: scale(1.08); box-shadow: 0 0 0 7px var(--help), 0 8px 22px rgba(27, 37, 48, 0.18); }
+.acked .card { opacity: 0.45; }
+.acked .card.answer { box-shadow: 0 0 0 7px var(--ok), 0 8px 22px rgba(27, 37, 48, 0.18); }
+.tick { position: absolute; top: -14px; right: -14px; width: 44px; height: 44px; border-radius: 50%; background: var(--ok); color: #FFFFFF; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+.tick svg { width: 24px; height: 24px; }
+
+.single { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.single .card { flex: none; width: min(100%, 620px, calc((100vh - 400px) * 1.3333)); max-width: none; cursor: default; }
+@supports (height: 100dvh) { .single .card { width: min(100%, 620px, calc((100dvh - 400px) * 1.3333)); } }
+.name-hint { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; color: var(--ink); background: var(--card); border-radius: 999px; padding: 4px 22px; box-shadow: 0 0 0 4px var(--help); }
+.name-hint[data-show="false"] { visibility: hidden; }
+
+.group { position: relative; width: min(100%, 860px, calc((100vh - 300px) * 1.3333)); aspect-ratio: 4 / 3; border-radius: 26px; background: var(--card); padding: 10px; box-sizing: border-box; box-shadow: 0 2px 10px rgba(27, 37, 48, 0.1); }
+@supports (height: 100dvh) { .group { width: min(100%, 860px, calc((100dvh - 300px) * 1.3333)); } }
+.group-photo { position: relative; width: 100%; height: 100%; }
+.group-photo svg { width: 100%; height: 100%; display: block; border-radius: 17px; }
+.face { position: absolute; width: 24%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 0; background: transparent; cursor: pointer; padding: 0; transition: box-shadow 0.4s ease; }
+.helping .face.answer { box-shadow: 0 0 0 7px var(--help); }
+.acked .face.answer { box-shadow: 0 0 0 7px var(--ok); }
+
+.parent-strip { flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px; padding-top: 12px; margin-top: 10px; border-top: 1px solid var(--rule); }
+.parent-strip span { font-size: 0.9rem; color: var(--muted); font-weight: 700; }
+.pbtn { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.pbtn.yes { border-color: var(--ok); color: var(--ok); }
+
+.celebrate { position: absolute; inset: 0; background: var(--veil); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 4; overflow: hidden; }
+.cele-card { width: min(70%, 460px, calc((100vh - 280px) * 1.3333)); aspect-ratio: 4 / 3; padding: 10px; border-radius: 26px; background: var(--card); box-shadow: 0 0 0 7px var(--ok), 0 10px 30px rgba(27, 37, 48, 0.2); box-sizing: border-box; animation: grow 0.5s ease-out both; }
+.cele-card svg { width: 100%; height: 100%; display: block; border-radius: 17px; }
+.cele-text { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 1.2rem + 3vw, 3.2rem); color: var(--ok); margin: 0; }
+.star { position: absolute; left: 50%; top: 45%; width: 46px; height: 46px; color: var(--help); transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r)); animation: burst 0.9s ease-out both; }
+@keyframes burst { from { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r)); opacity: 1; } }
+@keyframes grow { from { transform: scale(0.85); } to { transform: scale(1); } }
+
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; }
+.for-parent { color: var(--muted); font-size: 0.95rem; font-weight: 700; }
+.play { width: 170px; height: 170px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 10px 30px rgba(42, 118, 149, 0.35); }
+.play svg { width: 74px; height: 74px; margin-left: 10px; }
+.done-star { width: 190px; height: 190px; color: var(--help); }
+.done-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.4rem, 1.6rem + 3vw, 3.8rem); margin: 0; }
+.faces-row { display: flex; gap: 12px; }
+.faces-row span { width: 78px; height: 78px; border-radius: 50%; overflow: hidden; background: var(--card); box-shadow: 0 0 0 4px var(--card), 0 2px 8px rgba(0, 0, 0, 0.12); }
+.faces-row svg { width: 100%; height: 100%; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .face { transition: none; }
+  .star { animation: none; }
+  .cele-card { animation: none; }
+  .lock.holding .ring { transition: none; stroke-dashoffset: 0; }
+}
+</style>
+
+<div class="shell">
+  <div class="demo" id="demo">
+    <b>Prototype</b>
+    <label for="lvl">Level
+      <select id="lvl">
+        <option value="l1">1 · Who is this?</option>
+        <option value="l2" selected>2 · 2 separate photos</option>
+        <option value="l3">3 · 3 separate photos</option>
+        <option value="l3g">3 · group photo</option>
+      </select>
+    </label>
+    <span>The device voice stands in for your recorded voice. Hold the lock for 2 seconds to stop.</span>
+  </div>
+  <div class="stage">
+    <button type="button" class="lock" id="lock" aria-label="Parent lock: hold for 2 seconds">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+        <circle class="ring" cx="24" cy="24" r="20"/>
+        <rect x="17" y="22" width="14" height="11" rx="2" fill="currentColor"/>
+        <path d="M19.5 22v-3a4.5 4.5 0 0 1 9 0v3" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      </svg>
+    </button>
+    <div id="screen"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var screenEl = document.getElementById("screen");
+  var lockEl = document.getElementById("lock");
+  var lvlEl = document.getElementById("lvl");
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function rand(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  /* Drawings stand in for the family's photos. */
+  var FIG = {
+    dad: { shirt: "#2D6E8E", hair: "#2B1D14", skin: "#A8714A" },
+    mum: { shirt: "#C9822B", hair: "#1F1510", skin: "#C08A5E" },
+    gma: { shirt: "#7A5CA8", hair: "#BDB7B0", skin: "#9A6644" },
+    cousin: { shirt: "#4F7A5A", hair: "#2A1E16", skin: "#B98256" }
+  };
+  var PEOPLE = { mum: "Mummy", dad: "Daddy", gma: "Grandma", cousin: "Cousin" };
+  function sceneSVG(s) {
+    var g = '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">';
+    g += '<rect width="400" height="300" fill="' + s.bg + '"/><rect y="230" width="400" height="70" fill="' + s.floor + '"/>';
+    if (s.windowX != null) g += '<rect x="' + s.windowX + '" y="36" width="72" height="62" rx="6" fill="#CFE6F2" stroke="#FFFFFF" stroke-width="6"/>';
+    if (s.tree) g += '<rect x="352" y="118" width="16" height="114" fill="#7A5A3C"/><circle cx="360" cy="100" r="40" fill="#5E9E5A"/>';
+    s.figures.forEach(function (f) {
+      var x = f.x, c = FIG[f.id];
+      g += '<path d="M' + (x - 58) + " 300 C " + (x - 56) + " 200, " + (x - 30) + " 168, " + x + " 168 S " + (x + 56) + " 200, " + (x + 58) + ' 300 Z" fill="' + c.shirt + '"/>';
+      g += '<rect x="' + (x - 9) + '" y="140" width="18" height="30" fill="' + c.skin + '"/>';
+      g += '<circle cx="' + x + '" cy="120" r="30" fill="' + c.skin + '"/>';
+      g += '<path d="M' + (x - 31) + " 118 C " + (x - 32) + " 82, " + (x + 32) + " 82, " + (x + 31) + " 118 C " + (x + 20) + " 100, " + (x - 20) + " 100, " + (x - 31) + ' 118 Z" fill="' + c.hair + '"/>';
+    });
+    var x0 = s.figures[0].x;
+    if (s.prop === "bowl") g += '<path d="M' + (x0 - 46) + ' 250 h92 a46 30 0 0 1 -92 0z" fill="#FFFFFF" stroke="#CBB48E" stroke-width="3"/>';
+    if (s.prop === "book") g += '<rect x="' + (x0 - 34) + '" y="205" width="68" height="48" rx="4" fill="#B5473A"/><rect x="' + (x0 - 2) + '" y="205" width="4" height="48" fill="#8E3328"/>';
+    if (s.prop === "zz") g += '<text x="' + (x0 + 40) + '" y="90" font-size="28" font-weight="700" fill="#6B5A8E" font-family="sans-serif">z z</text>';
+    if (s.prop === "ball") g += '<circle cx="' + (x0 + 70) + '" cy="262" r="24" fill="#E5533D"/><path d="M' + (x0 + 46) + " 262 h48" + '" stroke="#FFFFFF" stroke-width="5"/>';
+    if (s.prop === "table") {
+      g += '<rect x="0" y="238" width="400" height="62" fill="#B08560"/><rect x="0" y="232" width="400" height="10" fill="#C79B72"/>';
+      s.figures.forEach(function (f) { g += '<ellipse cx="' + f.x + '" cy="240" rx="24" ry="7" fill="#FFFFFF"/>'; });
+    }
+    return g + "</svg>";
+  }
+  function one(id, o) { return { bg: o.bg, floor: o.floor, prop: o.prop, tree: o.tree, windowX: o.windowX, figures: [{ id: id, x: 200 }] }; }
+  var SINGLES = {
+    dad: [one("dad", { bg: "#F4E6D3", floor: "#DCC3A0", prop: "bowl", windowX: 296 }), one("dad", { bg: "#DCEFE9", floor: "#9CCB8E", tree: true })],
+    mum: [one("mum", { bg: "#DDEBF2", floor: "#B9CFDB", prop: "book" }), one("mum", { bg: "#F6E3D6", floor: "#E0C4AE", windowX: 30 })],
+    gma: [one("gma", { bg: "#E8E2F1", floor: "#CDC3DD", prop: "zz" }), one("gma", { bg: "#E3F0E4", floor: "#C3DBC6", tree: true })],
+    cousin: [one("cousin", { bg: "#FBEFD9", floor: "#E9D2A6", prop: "ball" })]
+  };
+  var GROUPS3 = [
+    { bg: "#F6E3D6", floor: "#E0C4AE", prop: "table", figures: [{ id: "gma", x: 85 }, { id: "dad", x: 200 }, { id: "mum", x: 315 }] },
+    { bg: "#E3EEF4", floor: "#C2D5E0", windowX: 164, figures: [{ id: "mum", x: 80 }, { id: "cousin", x: 200 }, { id: "dad", x: 320 }] }
+  ];
+
+  var ICON = {
+    speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none"/></svg>',
+    star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5L2.5 9.3l6.6-.8z" fill="currentColor"/></svg>',
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>'
+  };
+
+  var HELP_DELAY = 3000;
+  var TOTAL = 5;
+  var S = { level: "l2", screen: "start", qIndex: 0, q: null, phase: "ask", wrong: false, lastTarget: null, lastPos: [] };
+  var timers = [];
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function say(text) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.85;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* the prototype works silently without a device voice */ }
+  }
+
+  function pickTarget(ids) {
+    var pool = ids.filter(function (id) { return id !== S.lastTarget; });
+    return rand(pool.length ? pool : ids);
+  }
+  function makeQuestion(level) {
+    if (level === "l1") {
+      var t1 = pickTarget(Object.keys(SINGLES));
+      return { type: "say", target: t1, photo: rand(SINGLES[t1]) };
+    }
+    if (level === "l3g") {
+      var g = rand(GROUPS3);
+      var tg = pickTarget(g.figures.map(function (f) { return f.id; }));
+      return { type: "group", target: tg, scene: g };
+    }
+    var n = level === "l2" ? 2 : 3;
+    var t = pickTarget(Object.keys(SINGLES));
+    var others = shuffle(Object.keys(SINGLES).filter(function (id) { return id !== t; })).slice(0, n - 1);
+    var order, pos, tries = 0;
+    do {
+      order = shuffle([t].concat(others));
+      pos = order.indexOf(t);
+      tries++;
+    } while (tries < 12 && S.lastPos.length >= 2 && S.lastPos[0] === pos && S.lastPos[1] === pos);
+    S.lastPos = [pos].concat(S.lastPos).slice(0, 2);
+    return { type: "pick", target: t, choices: order.map(function (id) { return { id: id, photo: rand(SINGLES[id]) }; }) };
+  }
+  function qText(q) { return q.type === "say" ? "Who is this?" : "Where’s " + PEOPLE[q.target] + "?"; }
+
+  function dots() {
+    var h = '<div class="dots" aria-label="Question ' + (S.qIndex + 1) + " of " + TOTAL + '">';
+    for (var i = 0; i < TOTAL; i++) h += "<i" + (i < S.qIndex ? ' class="done"' : i === S.qIndex && S.screen === "q" ? ' class="now"' : S.screen === "done" ? ' class="done"' : "") + "></i>";
+    return h + "</div>";
+  }
+
+  function renderStart() {
+    var names = { l1: "Level 1 · Who is this?", l2: "Level 2 · 2 people", l3: "Level 3 · 3 people", l3g: "Level 3 · group photo" };
+    return '<div class="center"><p class="for-parent">' + names[S.level] + " · " + TOTAL + ' questions</p>' +
+      '<button type="button" class="play" data-act="play" aria-label="Play">' + ICON.play + "</button></div>";
+  }
+
+  function renderQ() {
+    var q = S.q, name = PEOPLE[q.target];
+    var helping = S.phase === "help", acked = S.phase === "ack" || S.phase === "celebrate";
+    var stateCls = helping ? " helping" : acked ? " acked" : "";
+    var h = dots();
+    h += '<div class="question"><button type="button" class="speak" data-act="speak" aria-label="Hear the question again">' + ICON.speak + '</button><span class="qtext">' + esc(qText(q)) + "</span></div>";
+    h += '<p class="ack-line" data-show="' + (S.phase === "ack") + '">' + (S.notYet ? "That’s " + esc(name) : "Yes, " + esc(name)) + "</p>";
+    h += '<div class="content">';
+    if (q.type === "say") {
+      h += '<div class="single"><div class="card">' + sceneSVG(q.photo) + "</div>" +
+        '<p class="name-hint" data-show="' + (helping || S.phase === "ack") + '">' + esc(name) + "</p></div>";
+    } else if (q.type === "pick") {
+      h += '<div class="choices' + stateCls + '">' + q.choices.map(function (c, i) {
+        var isAns = c.id === q.target;
+        return '<button type="button" class="card' + (isAns ? " answer" : "") + '" data-act="tap" data-id="' + c.id + '" aria-label="Photo ' + (i + 1) + '">' +
+          sceneSVG(c.photo) + (isAns && S.phase === "ack" ? '<span class="tick">' + ICON.check + "</span>" : "") + "</button>";
+      }).join("") + "</div>";
+    } else {
+      h += '<div class="group' + stateCls + '"><div class="group-photo">' + sceneSVG(q.scene) + q.scene.figures.map(function (f, i) {
+        return '<button type="button" class="face' + (f.id === q.target ? " answer" : "") + '" style="left:' + (f.x / 4) + '%;top:42%" data-act="tap" data-id="' + f.id + '" aria-label="Person ' + (i + 1) + '"></button>';
+      }).join("") + "</div></div>";
+    }
+    h += "</div>";
+    if (q.type === "say") {
+      h += '<div class="parent-strip"><span>For you: did he say it?</span>' +
+        '<button type="button" class="pbtn yes" data-act="said" data-v="alone">Said it</button>' +
+        '<button type="button" class="pbtn" data-act="said" data-v="help">Said it after help</button>' +
+        '<button type="button" class="pbtn" data-act="said" data-v="notyet">Not yet</button></div>';
+    }
+    if (S.phase === "celebrate") {
+      var stars = [[-340, -140, -12], [340, -130, 14], [-390, 40, 8], [390, 30, -10], [-320, 190, 16], [320, 190, -14], [-180, -235, 6], [180, -235, -6]];
+      h += '<div class="celebrate" role="status"><div class="cele-card">' + sceneSVG(SINGLES[q.target][0]) + '</div><p class="cele-text">Yes! ' + esc(name) + "!</p>" +
+        stars.map(function (s, i) { return '<span class="star" style="--dx:' + s[0] + "px;--dy:" + s[1] + "px;--r:" + s[2] + "deg;animation-delay:" + (i * 60) + 'ms">' + ICON.star + "</span>"; }).join("") + "</div>";
+    }
+    return h;
+  }
+
+  function renderDone() {
+    var ids = ["mum", "dad", "gma"];
+    return dots() + '<div class="center"><div class="done-star">' + ICON.star + '</div><p class="done-title">All done!</p>' +
+      '<div class="faces-row">' + ids.map(function (id) {
+        return "<span>" + '<svg viewBox="140 70 120 120" aria-hidden="true">' + sceneSVG(SINGLES[id][0]).replace(/^<svg[^>]*>|<\/svg>$/g, "") + "</svg></span>";
+      }).join("") + '</div><p class="for-parent">For you: hold the lock for 2 seconds to go back to parent mode.</p></div>';
+  }
+
+  function render() {
+    lvlEl.value = S.level;
+    if (S.screen === "start") screenEl.innerHTML = renderStart();
+    else if (S.screen === "done") screenEl.innerHTML = renderDone();
+    else screenEl.innerHTML = renderQ();
+  }
+
+  /* ---------- Flow ---------- */
+  function start() { clearTimers(); S.screen = "q"; S.qIndex = 0; S.lastTarget = null; S.lastPos = []; next(); }
+  function next() {
+    clearTimers();
+    if (S.qIndex >= TOTAL) { S.screen = "done"; render(); say("All done!"); return; }
+    S.q = makeQuestion(S.level);
+    S.lastTarget = S.q.target;
+    S.phase = "ask"; S.wrong = false; S.notYet = false;
+    render();
+    say(qText(S.q));
+    later(showHelp, HELP_DELAY);
+  }
+  function showHelp() {
+    if (S.phase !== "ask") return;
+    S.phase = "help";
+    render();
+    if (S.q.type === "say") say(PEOPLE[S.q.target]);
+  }
+  function advance(ms) { later(function () { S.qIndex++; next(); }, ms); }
+  function celebrate() { clearTimers(); S.phase = "celebrate"; render(); say("Yes! " + PEOPLE[S.q.target] + "!"); advance(2800); }
+  function ack() { clearTimers(); S.phase = "ack"; render(); say("Yes, " + PEOPLE[S.q.target]); advance(1500); }
+
+  screenEl.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]");
+    if (!el) return;
+    var act = el.getAttribute("data-act");
+    if (act === "play") { start(); return; }
+    if (act === "speak") { say(qText(S.q)); return; }
+    if (S.screen !== "q" || S.phase === "ack" || S.phase === "celebrate") return;
+    if (act === "tap") {
+      if (el.getAttribute("data-id") === S.q.target) {
+        if (S.phase === "ask" && !S.wrong) celebrate(); else ack();
+      } else {
+        /* No buzzer and no red X: show the answer and ask again. */
+        S.wrong = true;
+        clearTimers();
+        S.phase = "help";
+        render();
+        say(qText(S.q));
+      }
+      return;
+    }
+    if (act === "said") {
+      var v = el.getAttribute("data-v");
+      if (v === "alone") celebrate();
+      else if (v === "help") ack();
+      else { clearTimers(); S.notYet = true; S.phase = "ack"; render(); say("That’s " + PEOPLE[S.q.target]); advance(1800); }
+    }
+  });
+
+  /* Parent lock: press and hold for 2 seconds. */
+  var holdTimer = null;
+  function holdEnd() { lockEl.classList.remove("holding"); clearTimeout(holdTimer); }
+  lockEl.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    lockEl.classList.add("holding");
+    holdTimer = setTimeout(function () {
+      holdEnd();
+      clearTimers();
+      try { window.speechSynthesis.cancel(); } catch (err) { /* no voice */ }
+      S.screen = "start";
+      render();
+    }, 2000);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(function (t) { lockEl.addEventListener(t, holdEnd); });
+  lockEl.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+  lvlEl.addEventListener("change", function () { clearTimers(); S.level = lvlEl.value; S.screen = "start"; render(); });
+
+  /* Fixed states for the screen gallery. */
+  window.__demo = {
+    show: function (o) {
+      clearTimers();
+      S.level = o.level || S.level;
+      S.screen = o.screen || "q";
+      S.qIndex = o.qIndex || 0;
+      S.phase = o.phase || "ask";
+      S.notYet = false;
+      if (o.say) S.q = { type: "say", target: o.say, photo: SINGLES[o.say][0] };
+      if (o.pick) S.q = { type: "pick", target: o.target, choices: o.pick.map(function (id) { return { id: id, photo: SINGLES[id][0] }; }) };
+      if (o.group != null) S.q = { type: "group", target: o.target, scene: GROUPS3[o.group] };
+      render();
+    }
+  };
+
+  render();
+})();
+</script>

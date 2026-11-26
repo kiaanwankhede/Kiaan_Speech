@@ -1,0 +1,113 @@
+<title>Who Is It? Kid Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700..800&display=swap">
+<style>
+/* Layout: one screen per row, each in a tablet frame, numbered because the screens follow the order a parent uses them. */
+:root {
+  --bg: #F2F6F8;
+  --ink: #16202B;
+  --muted: #566374;
+  --frame: #1E2833;
+  --rule: #D4DCE4;
+  --accent: #1B6683;
+  --accent-ink: #FFFFFF;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0E131A; --ink: #E5EAF0; --muted: #9AA7B5; --frame: #2C3846; --rule: #2A3542; --accent: #72BAD6; --accent-ink: #0B1A21; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0E131A; --ink: #E5EAF0; --muted: #9AA7B5; --frame: #2C3846; --rule: #2A3542; --accent: #72BAD6; --accent-ink: #0B1A21; color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 1100px; margin: 0 auto; padding-block: 28px 64px; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem); font-weight: 800; line-height: 1.15; }
+.intro { color: var(--muted); margin: 10px 0 0; max-width: 62ch; }
+.screens { list-style: none; margin: 32px 0 0; padding: 0; display: flex; flex-direction: column; gap: 44px; }
+.screen { display: flex; flex-direction: column; gap: 14px; }
+.screen-head { display: flex; gap: 12px; align-items: flex-start; }
+.n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; margin-top: 2px; }
+.screen-head h2 { font-size: 1.25rem; line-height: 1.3; }
+.screen-head p { color: var(--muted); margin: 4px 0 0; max-width: 70ch; }
+.device { background: var(--frame); border-radius: 22px; padding: 14px; max-width: 100%; box-sizing: border-box; }
+.device img { display: block; width: 100%; height: auto; border-radius: 10px; }
+.note { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.92rem; max-width: 70ch; }
+@media (max-width: 520px) { .device { padding: 8px; border-radius: 14px; } .device img { border-radius: 7px; } }
+</style>
+
+<main>
+  <h1>Kid mode, screen by screen</h1>
+  <p class="intro">What he sees on the Lenovo Tab. The drawings stand in for your family photos, and the question plays in your recorded voice.</p>
+
+  <ol class="screens">
+    <li class="screen">
+      <div class="screen-head"><span class="n">1</span><div>
+        <h2>Start</h2>
+        <p>You tap Play. The level and number of questions show in small text, for you.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/1-start.jpg" width="2560" height="1600" alt="Start screen with one large Play button"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">2</span><div>
+        <h2>Level 1 · Who is this?</h2>
+        <p>One photo, and the question plays in your voice. At the bottom, you mark what he did.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/2-who-is-this.jpg" width="2560" height="1600" alt="Who is this screen with one photo of Daddy and parent buttons at the bottom" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">3</span><div>
+        <h2>Level 1 · help</h2>
+        <p>If he doesn’t answer within a few seconds, the name appears and plays.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/3-who-is-this-help.jpg" width="2560" height="1600" alt="Who is this screen with the name Daddy shown under the photo" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">4</span><div>
+        <h2>Level 2 · two photos</h2>
+        <p>“Where’s Daddy?” He taps a photo. Where the right photo sits is shuffled every question.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/4-two-photos.jpg" width="2560" height="1600" alt="Where is Daddy screen with two photos side by side" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">5</span><div>
+        <h2>Level 3 · help</h2>
+        <p>If he waits or taps the wrong photo, the right one grows and gets a yellow ring. No buzzer and no red X.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/5-three-photos-help.jpg" width="2560" height="1600" alt="Three photos with the correct one enlarged and ringed in yellow" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">6</span><div>
+        <h2>Level 3 · group photo</h2>
+        <p>One photo with everyone in it. He taps Mummy’s face.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/6-group-photo.jpg" width="2560" height="1600" alt="Where is Mummy screen with one family dinner photo" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">7</span><div>
+        <h2>Well done</h2>
+        <p>The big celebration only comes when he gets it right on his own. With help, he gets a short “Yes, Daddy” instead.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/7-well-done.jpg" width="2560" height="1600" alt="Celebration screen with Daddy’s photo, stars and Yes Daddy" loading="lazy"></div>
+    </li>
+    <li class="screen">
+      <div class="screen-head"><span class="n">8</span><div>
+        <h2>All done</h2>
+        <p>The session ends after the set number of questions. There is no play-again button, so you decide. Hold the lock to go back.</p>
+      </div></div>
+      <div class="device"><img src="kid-screens/8-all-done.jpg" width="2560" height="1600" alt="All done screen with a star and three family faces" loading="lazy"></div>
+    </li>
+  </ol>
+
+  <p class="note">This is a design mock-up. The lock in the top corner takes you back to parent mode when held for 2 seconds.</p>
+</main>
