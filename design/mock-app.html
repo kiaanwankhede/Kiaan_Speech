@@ -323,10 +323,14 @@ tr.new td { background: var(--accent-soft); }
 .tick { position: absolute; top: -14px; right: -14px; width: 44px; height: 44px; border-radius: 50%; background: var(--k-ok); color: #FFFFFF; display: grid; place-items: center; }
 .tick svg { width: 24px; height: 24px; }
 .single { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-.single .kcard { flex: none; width: min(100%, 620px, calc((100vh - 400px) * 1.3333)); max-width: none; cursor: default; }
-@supports (height: 100dvh) { .single .kcard { width: min(100%, 620px, calc((100dvh - 400px) * 1.3333)); } }
+.single > .kcard { flex: none; width: min(100%, 620px, calc((100vh - 400px) * 1.3333)); max-width: none; cursor: default; }
+@supports (height: 100dvh) { .single > .kcard { width: min(100%, 620px, calc((100dvh - 400px) * 1.3333)); } }
 .name-hint { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; background: var(--k-card); border-radius: 999px; padding: 4px 22px; box-shadow: 0 0 0 4px var(--k-help); }
 .name-hint[data-show="false"] { visibility: hidden; }
+.pointing .kcard { cursor: default; max-width: min(400px, calc((100vh - 430px) * 1.3333)); }
+.pointing .kcard.answer { transform: scale(1.06); box-shadow: 0 0 0 7px var(--k-accent), 0 8px 22px rgba(27, 37, 48, 0.18); }
+.group.pointing { width: min(100%, 760px, calc((100vh - 430px) * 1.3333)); }
+.pointing .face.answer { box-shadow: 0 0 0 7px var(--k-accent); cursor: default; }
 .group { position: relative; width: min(100%, 860px, calc((100vh - 300px) * 1.3333)); aspect-ratio: 4 / 3; border-radius: 26px; background: var(--k-card); padding: 10px; box-sizing: border-box; box-shadow: 0 2px 10px rgba(27, 37, 48, 0.1); }
 @supports (height: 100dvh) { .group { width: min(100%, 860px, calc((100dvh - 300px) * 1.3333)); } }
 .group-photo { position: relative; width: 100%; height: 100%; }
@@ -456,7 +460,7 @@ tr.new td { background: var(--accent-soft); }
       photo("p7", "Daddy at the park", { bg: "#DCEFE9", floor: "#9CCB8E", figures: [fig(200, "dad")], tree: true }, 1, [F(50, "dad")], "park", ""),
       photo("p8", "Mummy by the window", { bg: "#F6E3D6", floor: "#E0C4AE", figures: [fig(200, "mum")], windowX: 30 }, 1, [F(50, "mum")], "", ""),
       photo("p9", "Grandma in the garden", { bg: "#E3F0E4", floor: "#C3DBC6", figures: [fig(200, "gma")], tree: true }, 1, [F(50, "gma")], "garden", ""),
-      photo("p10", "Sofa time", { bg: "#E3EEF4", floor: "#C2D5E0", figures: [fig(80, "mum"), fig(200, "cousin"), fig(320, "dad")], windowX: 164 }, 3, [F(20, "mum"), F(50, "cousin", "reading"), F(80, "dad")], "living room", ""),
+      photo("p10", "Sofa time", { bg: "#E3EEF4", floor: "#C2D5E0", figures: [fig(80, "mum"), fig(200, "cousin"), fig(320, "dad")], prop: "book", windowX: 164 }, 3, [F(20, "mum", "reading"), F(50, "cousin"), F(80, "dad")], "living room", "book"),
       photo("p11", "At the park", { bg: "#DCEFE9", floor: "#9CCB8E", figures: [fig(130, "dad"), fig(250, "cousin")], tree: true }, null, [], "", "")
     ],
     who: {
@@ -464,9 +468,9 @@ tr.new td { background: var(--accent-soft); }
       helpDelay: 3,
       levels: {
         1: { on: true, questions: 10 },
-        2: { on: true, layout: "separate", ask: "show", questions: 10 },
-        3: { on: true, layout: "mixed", ask: "show", questions: 10 },
-        4: { on: false, layout: "separate", ask: "show", questions: 10, howMany: 4 }
+        2: { on: true, layout: "separate", ask: "action", questions: 10 },
+        3: { on: true, layout: "mixed", ask: "mixed", questions: 10 },
+        4: { on: false, layout: "group", ask: "this", questions: 10, howMany: 4 }
       }
     },
     sessions: [
@@ -489,17 +493,17 @@ tr.new td { background: var(--accent-soft); }
 
   /* ---------- Exercise registry: shared engine, one entry per exercise ---------- */
   var EXERCISES = [
-    { id: "who", word: "Who", group: "questions", status: "active", about: "Recognise the people in his life.", needs: "people tagged in photos", example: "“Who is this?” · “Show me Daddy” · “Who is eating?”" },
+    { id: "who", word: "Who", group: "questions", status: "active", about: "Recognise the people in his life.", needs: "people tagged in photos", example: "“Who is this?” · “Who is eating?”" },
     { id: "where", word: "Where", group: "questions", status: "later", about: "Places and where things are.", needs: "a place on each photo", example: "“Where is Daddy?” → the kitchen" },
     { id: "what", word: "What", group: "questions", status: "later", about: "Things and actions.", needs: "things listed on photos", example: "“What is Daddy eating?”" },
     { id: "say", word: "Say it", group: "speech", status: "later", about: "Name a picture out loud.", needs: "any labelled photo", example: "He names the photo, you mark it" },
     { id: "sounds", word: "Sounds", group: "speech", status: "later", about: "Copy simple sounds and words.", needs: "sounds you record", example: "“ba”, “ma”, “bye-bye”" }
   ];
   var WHO_LEVELS = {
-    1: { name: "Who is this?", desc: "One photo of one person. He says the name and you mark it." },
-    2: { name: "2 people", desc: "He picks between 2 people." },
-    3: { name: "3 people", desc: "He picks between 3 people." },
-    4: { name: "Many people", desc: "He picks among 4 or more people." }
+    1: { name: "Who is this?", desc: "One photo of one person. “Who is this?” He says the name and you mark it." },
+    2: { name: "2 people", desc: "2 people on screen. “Who is this?” about the ringed person, or “Who is eating?” and he taps." },
+    3: { name: "3 people", desc: "3 people on screen. Same two questions." },
+    4: { name: "Many people", desc: "4 or more people on screen. Same two questions." }
   };
 
   function person(id) { for (var i = 0; i < D.people.length; i++) if (D.people[i].id === id) return D.people[i]; return null; }
@@ -767,7 +771,7 @@ tr.new td { background: var(--accent-soft); }
       var L = D.who.levels[n], r = readiness(n), body = "";
       if (n > 1) {
         body += '<div class="seg-wrap"><span class="seg-label">Show as</span>' + seg(n, "layout", [["separate", "Separate photos"], ["group", "Group photo"], ["mixed", "Mixed"]], L.layout, !L.on) + "</div>";
-        body += '<div class="seg-wrap"><span class="seg-label">Question</span>' + seg(n, "ask", [["show", "Show me Daddy"], ["action", "Who is eating?"], ["mixed", "Mixed"]], L.ask, !L.on) + "</div>";
+        body += '<div class="seg-wrap"><span class="seg-label">Question</span>' + seg(n, "ask", [["this", "Who is this?"], ["action", "Who is eating?"], ["mixed", "Mixed"]], L.ask, !L.on) + "</div>";
       }
       if (n === 4) body += '<div class="seg-wrap"><span class="seg-label">People to choose from</span>' + seg(n, "howMany", [[4, "4"], [5, "5"], [6, "6"]], L.howMany, !L.on || L.layout === "group") + "</div>";
       body += '<div class="seg-wrap"><span class="seg-label">Questions per session</span>' + seg(n, "questions", [[5, "5"], [10, "10"], [15, "15"]], L.questions, !L.on) + "</div>";
@@ -818,63 +822,75 @@ tr.new td { background: var(--accent-soft); }
     clear: function () { K.timers.forEach(clearTimeout); K.timers = []; },
     stop: function () { K.clear(); try { window.speechSynthesis.cancel(); } catch (e) { /* no voice */ } }
   };
-  /* Who exercise: builds a question from the labelled photo library. */
+  /* Who exercise: builds a "who" question from the labelled photo library. */
   var WhoExercise = {
     build: function (level) {
       var st = K.st, L = D.who.levels[level];
       if (level === 1) {
         var ones = photosWith("who1");
-        var p = rand(ones.filter(function (x) { return x.faces[0].personId !== st.lastTarget; }).length ? ones.filter(function (x) { return x.faces[0].personId !== st.lastTarget; }) : ones);
-        return { type: "say", target: p.faces[0].personId, photo: p };
+        var fresh = ones.filter(function (x) { return x.faces[0].personId !== st.lastTarget; });
+        var p = rand(fresh.length ? fresh : ones);
+        return { type: "this", layout: "single", target: p.faces[0].personId, photo: p };
       }
-      var useGroup = L.layout === "group" || (L.layout === "mixed" && Math.random() < 0.5);
+      var n = level === 4 ? L.howMany : level;
       var groups = photosWith("whoG" + level);
-      if (useGroup && groups.length) return WhoExercise.group(rand(groups), L.ask);
-      return WhoExercise.separate(level === 4 ? L.howMany : level, L.ask);
+      var useGroup = (L.layout === "group" || (L.layout === "mixed" && Math.random() < 0.5)) && groups.length > 0;
+      var ask = L.ask === "mixed" ? (Math.random() < 0.5 ? "this" : "action") : L.ask;
+      var q = null;
+      if (ask === "action") q = useGroup ? WhoExercise.groupAction(rand(groups)) : WhoExercise.separateAction(n);
+      if (!q) q = useGroup ? WhoExercise.groupThis(rand(groups)) : WhoExercise.separateThis(n);
+      return q;
     },
-    group: function (p, ask) {
+    groupAction: function (p) {
       var faces = p.faces;
-      var wantAction = ask === "action" || (ask === "mixed" && Math.random() < 0.5);
-      if (wantAction) {
-        var unique = faces.filter(function (f) { return f.action && faces.filter(function (g) { return g.action === f.action; }).length === 1; });
-        if (unique.length) { var u = rand(unique); return { type: "group", target: u.personId, action: u.action, photo: p }; }
-      }
-      var pool = faces.filter(function (f) { return f.personId !== K.st.lastTarget; });
-      return { type: "group", target: rand(pool.length ? pool : faces).personId, photo: p };
+      var unique = faces.filter(function (f) { return f.action && faces.filter(function (g) { return g.action === f.action; }).length === 1; });
+      if (!unique.length) return null;
+      var u = rand(unique);
+      return { type: "tap", layout: "group", target: u.personId, action: u.action, photo: p };
     },
-    separate: function (n, ask) {
-      var st = K.st, byP = singlesByPerson(), ids = Object.keys(byP);
-      var wantAction = ask === "action" || (ask === "mixed" && Math.random() < 0.5);
-      var target, targetPhoto, action = "";
-      if (wantAction) {
-        var withAct = [];
-        ids.forEach(function (id) { byP[id].forEach(function (ph) { if (ph.faces[0].action) withAct.push(ph); }); });
-        withAct = shuffle(withAct.filter(function (ph) { return ph.faces[0].personId !== st.lastTarget; }));
-        for (var i = 0; i < withAct.length && !target; i++) {
-          var cand = withAct[i], act = cand.faces[0].action;
-          var others = ids.filter(function (id) { return id !== cand.faces[0].personId && byP[id].some(function (ph) { return ph.faces[0].action !== act; }); });
-          if (others.length >= n - 1) { target = cand.faces[0].personId; targetPhoto = cand; action = act; }
-        }
-      }
-      if (!target) {
-        var pool = ids.filter(function (id) { return id !== st.lastTarget; });
-        target = rand(pool.length ? pool : ids); targetPhoto = rand(byP[target]);
-      }
-      var distract = shuffle(ids.filter(function (id) { return id !== target; })).slice(0, n - 1).map(function (id) {
-        var opts = byP[id].filter(function (ph) { return !action || ph.faces[0].action !== action; });
+    groupThis: function (p) {
+      var pool = p.faces.filter(function (f) { return f.personId !== K.st.lastTarget; });
+      var f = rand(pool.length ? pool : p.faces);
+      return { type: "this", layout: "group", target: f.personId, photo: p };
+    },
+    others: function (n, target, avoidAction) {
+      var byP = singlesByPerson();
+      var ids = Object.keys(byP).filter(function (id) { return id !== target && (!avoidAction || byP[id].some(function (ph) { return ph.faces[0].action !== avoidAction; })); });
+      return shuffle(ids).slice(0, n - 1).map(function (id) {
+        var opts = byP[id].filter(function (ph) { return !avoidAction || ph.faces[0].action !== avoidAction; });
         return { id: id, photo: rand(opts.length ? opts : byP[id]) };
       });
-      var order, pos, tries = 0;
-      do { order = shuffle([{ id: target, photo: targetPhoto }].concat(distract)); pos = order.map(function (c) { return c.id; }).indexOf(target); tries++; }
+    },
+    place: function (target, targetPhoto, others) {
+      var st = K.st, order, pos, tries = 0;
+      do { order = shuffle([{ id: target, photo: targetPhoto }].concat(others)); pos = order.map(function (c) { return c.id; }).indexOf(target); tries++; }
       while (tries < 12 && st.lastPos.length >= 2 && st.lastPos[0] === pos && st.lastPos[1] === pos);
       st.lastPos = [pos].concat(st.lastPos).slice(0, 2);
-      return { type: "pick", target: target, action: action, choices: order, pos: pos };
+      return { order: order, pos: pos };
     },
-    text: function (q) {
-      if (q.type === "say") return "Who is this?";
-      if (q.action) return "Who is " + q.action + "?";
-      return "Show me " + personName(q.target);
-    }
+    separateAction: function (n) {
+      var st = K.st, byP = singlesByPerson(), ids = Object.keys(byP);
+      var withAct = [];
+      ids.forEach(function (id) { byP[id].forEach(function (ph) { if (ph.faces[0].action) withAct.push(ph); }); });
+      withAct = shuffle(withAct.filter(function (ph) { return ph.faces[0].personId !== st.lastTarget; }));
+      for (var i = 0; i < withAct.length; i++) {
+        var cand = withAct[i], act = cand.faces[0].action, t = cand.faces[0].personId;
+        var others = WhoExercise.others(n, t, act);
+        if (others.length >= n - 1) {
+          var pl = WhoExercise.place(t, cand, others);
+          return { type: "tap", layout: "separate", target: t, action: act, choices: pl.order, pos: pl.pos };
+        }
+      }
+      return null;
+    },
+    separateThis: function (n) {
+      var st = K.st, byP = singlesByPerson(), ids = Object.keys(byP);
+      var pool = ids.filter(function (id) { return id !== st.lastTarget; });
+      var t = rand(pool.length ? pool : ids);
+      var pl = WhoExercise.place(t, rand(byP[t]), WhoExercise.others(n, t, ""));
+      return { type: "this", layout: "separate", target: t, choices: pl.order, pos: pl.pos };
+    },
+    text: function (q) { return q.action ? "Who is " + q.action + "?" : "Who is this?"; }
   };
 
   function kidShell() {
@@ -911,27 +927,34 @@ tr.new td { background: var(--accent-soft); }
     var q = st.q, name = personName(q.target);
     var helping = st.phase === "help", acked = st.phase === "ack" || st.phase === "celebrate";
     var cls = helping ? " helping" : acked ? " acked" : "";
+    var isThis = q.type === "this";
     var h = kdots() + '<div class="kq"><button type="button" class="speak" data-k="speak" aria-label="Hear the question again">' + I.speak + '</button><span class="qtext">' + esc(WhoExercise.text(q)) + "</span></div>";
-    h += '<p class="ack-line" data-show="' + (st.phase === "ack") + '">' + (st.notYet ? "That’s " : "Yes, ") + esc(name) + "</p><div class=\"kcontent\">";
-    if (q.type === "say") {
-      h += '<div class="single"><div class="kcard">' + sceneSVG(q.photo.scene) + '</div><p class="name-hint" data-show="' + (helping || st.phase === "ack") + '">' + esc(name) + "</p></div>";
-    } else if (q.type === "pick") {
-      h += '<div class="choices' + cls + '">' + q.choices.map(function (c, i) {
+    h += '<p class="ack-line" data-show="' + (st.phase === "ack") + '">' + (st.notYet ? "That’s " : "Yes, ") + esc(name) + '</p><div class="kcontent">';
+    var hint = '<p class="name-hint" data-show="' + (isThis && (helping || st.phase === "ack")) + '">' + esc(name) + "</p>";
+    if (q.layout === "single") {
+      h += '<div class="single"><div class="kcard">' + sceneSVG(q.photo.scene) + "</div>" + hint + "</div>";
+    } else if (q.layout === "separate") {
+      h += '<div class="single"><div class="choices' + (isThis ? " pointing" : cls) + '">' + q.choices.map(function (c, i) {
         var ans = c.id === q.target;
-        return '<button type="button" class="kcard' + (ans ? " answer" : "") + '" data-k="tap" data-id="' + c.id + '" data-pos="' + i + '" aria-label="Photo ' + (i + 1) + '">' + sceneSVG(c.photo.scene) + (ans && st.phase === "ack" ? '<span class="tick">' + I.check + "</span>" : "") + "</button>";
-      }).join("") + "</div>";
+        if (isThis) return '<div class="kcard' + (ans ? " answer" : "") + '">' + sceneSVG(c.photo.scene) + "</div>";
+        return '<button type="button" class="kcard' + (ans ? " answer" : "") + '" data-k="tap" data-id="' + c.id + '" aria-label="Photo ' + (i + 1) + '">' + sceneSVG(c.photo.scene) + (ans && st.phase === "ack" ? '<span class="tick">' + I.check + "</span>" : "") + "</button>";
+      }).join("") + "</div>" + (isThis ? hint : "") + "</div>";
     } else {
-      h += '<div class="group' + cls + '"><div class="group-photo">' + sceneSVG(q.photo.scene) + q.photo.faces.map(function (f, i) {
-        return '<button type="button" class="face' + (f.personId === q.target ? " answer" : "") + '" style="left:' + f.x + "%;top:" + (f.y + 2) + '%" data-k="tap" data-id="' + f.personId + '" data-pos="' + i + '" aria-label="Person ' + (i + 1) + '"></button>';
-      }).join("") + "</div></div>";
+      h += '<div class="single"><div class="group' + (isThis ? " pointing" : cls) + '"><div class="group-photo">' + sceneSVG(q.photo.scene) + q.photo.faces.map(function (f, i) {
+        var ans = f.personId === q.target;
+        var pos = 'style="left:' + f.x + "%;top:" + (f.y + 2) + '%"';
+        if (isThis) return ans ? '<span class="face answer" ' + pos + "></span>" : "";
+        return '<button type="button" class="face' + (ans ? " answer" : "") + '" ' + pos + ' data-k="tap" data-id="' + f.personId + '" aria-label="Person ' + (i + 1) + '"></button>';
+      }).join("") + "</div></div>" + (isThis ? hint : "") + "</div>";
     }
     h += "</div>";
-    if (q.type === "say") {
+    if (isThis) {
       h += '<div class="parent-strip"><span>For you: did he say it?</span><button type="button" class="pbtn yes" data-k="said" data-v="alone">Said it</button><button type="button" class="pbtn" data-k="said" data-v="help">Said it after help</button><button type="button" class="pbtn" data-k="said" data-v="miss">Not yet</button></div>';
     }
     if (st.phase === "celebrate") {
       var stars = [[-340, -140, -12], [340, -130, 14], [-390, 40, 8], [390, 30, -10], [-320, 190, 16], [320, 190, -14], [-180, -235, 6], [180, -235, -6]];
-      var pic = q.type === "pick" ? q.choices[q.pos !== undefined ? q.choices.map(function (c) { return c.id; }).indexOf(q.target) : 0].photo : (singlesByPerson()[q.target] || [q.photo])[0];
+      var mine = singlesByPerson()[q.target];
+      var pic = mine && mine.length ? mine[0] : (q.photo || q.choices[q.pos].photo);
       h += '<div class="celebrate" role="status"><div class="cele-card">' + sceneSVG(pic.scene) + '</div><p class="cele-text">Yes! ' + esc(name) + "!</p>" +
         stars.map(function (s, i) { return '<span class="star" style="--dx:' + s[0] + "px;--dy:" + s[1] + "px;--r:" + s[2] + "deg;animation-delay:" + (i * 60) + 'ms">' + I.star + "</span>"; }).join("") + "</div>";
     }
@@ -954,8 +977,8 @@ tr.new td { background: var(--accent-soft); }
     say(WhoExercise.text(st.q));
     K.later(kHelp, D.who.helpDelay * 1000);
   }
-  function kHelp() { var st = K.st; if (st.phase !== "ask") return; st.phase = "help"; kRender(); if (st.q.type === "say") say(personName(st.q.target)); }
-  function kRecord(outcome) { var st = K.st; st.results.push({ ex: "who", person: st.q.target, outcome: outcome, pos: st.q.pos != null ? st.q.pos : 0, n: st.q.type === "pick" ? st.q.choices.length : 0 }); }
+  function kHelp() { var st = K.st; if (st.phase !== "ask") return; st.phase = "help"; kRender(); if (st.q.type === "this") say(personName(st.q.target)); }
+  function kRecord(outcome) { var st = K.st; st.results.push({ ex: "who", person: st.q.target, outcome: outcome, pos: st.q.pos != null ? st.q.pos : 0, n: st.q.type === "tap" && st.q.layout === "separate" ? st.q.choices.length : 0 }); }
   function kAdvance(ms) { K.later(function () { K.st.qIndex++; kNext(); }, ms); }
   function kCelebrate() { K.clear(); kRecord("alone"); K.st.phase = "celebrate"; kRender(); say("Yes! " + personName(K.st.q.target) + "!"); kAdvance(2600); }
   function kAck(outcome) { K.clear(); kRecord(outcome); K.st.phase = "ack"; kRender(); say((K.st.notYet ? "That’s " : "Yes, ") + personName(K.st.q.target)); kAdvance(1600); }
