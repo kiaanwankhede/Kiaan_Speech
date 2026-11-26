@@ -1,0 +1,695 @@
+<title>Who Is It? Parent Mode</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600..800&display=swap">
+<style>
+/* Layout: tablet-first app shell (max 1040px); tabs on top; labelling view splits photo | steps on wide screens, stacks on phones. */
+:root {
+  --bg: #F2F6F8;
+  --surface: #FFFFFF;
+  --surface-2: #E7EEF2;
+  --ink: #16202B;
+  --muted: #566374;
+  --rule: #D4DCE4;
+  --accent: #1B6683;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DFEDF3;
+  --mark: #A86A12;
+  --mark-soft: #FAEFD9;
+  --ok: #2B7A4B;
+  --ok-soft: #E2F2E8;
+  --warn: #9E4A17;
+  --warn-soft: #FBE8DA;
+  --danger: #B3261E;
+  --danger-ink: #FFFFFF;
+  --shadow: 0 1px 2px rgba(22, 32, 43, 0.08);
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E131A; --surface: #161D26; --surface-2: #1D2631; --ink: #E5EAF0; --muted: #9AA7B5; --rule: #2A3542;
+    --accent: #72BAD6; --accent-ink: #0B1A21; --accent-soft: #15303B; --mark: #E2B159; --mark-soft: #2E2410;
+    --ok: #74C79A; --ok-soft: #14301F; --warn: #F0A06A; --warn-soft: #36210F; --danger: #F28B82; --danger-ink: #2A0B08;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E131A; --surface: #161D26; --surface-2: #1D2631; --ink: #E5EAF0; --muted: #9AA7B5; --rule: #2A3542;
+  --accent: #72BAD6; --accent-ink: #0B1A21; --accent-soft: #15303B; --mark: #E2B159; --mark-soft: #2E2410;
+  --ok: #74C79A; --ok-soft: #14301F; --warn: #F0A06A; --warn-soft: #36210F; --danger: #F28B82; --danger-ink: #2A0B08;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#app { max-width: 1040px; margin: 0 auto; padding-block: 16px 64px; }
+h1, h2 { font-family: var(--font-display); color: var(--ink); text-wrap: balance; }
+h1 { font-size: 1.6rem; line-height: 1.2; margin: 0; }
+h2 { font-size: 1.08rem; line-height: 1.3; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+p { margin: 0; }
+.hint { color: var(--muted); font-size: 0.95rem; max-width: 64ch; }
+
+.proto { font-size: 0.85rem; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
+.brand span { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.drive { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--ok); background: var(--ok-soft); padding: 5px 11px; border-radius: 999px; }
+.drive svg { width: 16px; height: 16px; }
+
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 12px; margin-bottom: 22px; }
+.tab { flex: 1; border: 0; background: transparent; min-height: 44px; border-radius: 9px; font: inherit; font-weight: 700; color: var(--muted); cursor: pointer; }
+.tab[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+.btn.danger.solid { background: var(--danger); color: var(--danger-ink); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--accent); padding: 0 8px; }
+.btn:focus-visible, .chip:focus-visible, .tab:focus-visible, .card:focus-visible, .marker:focus-visible, .input:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 42px; min-width: 42px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.chip.add { border-style: dashed; color: var(--accent); }
+.chip.small { min-height: 34px; padding: 0 12px; font-size: 0.9rem; }
+
+.input { min-height: 44px; border: 1px solid var(--rule); border-radius: 10px; padding: 0 12px; font: inherit; background: var(--bg); color: var(--ink); width: 100%; box-sizing: border-box; }
+.input:disabled { opacity: 0.6; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; font-weight: 700; color: var(--muted); }
+
+/* Photos */
+.row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.filters { margin: 16px 0 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; text-align: left; padding: 0; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); color: inherit; font: inherit; overflow: hidden; cursor: pointer; min-width: 0; }
+.card:hover { border-color: var(--accent); }
+.thumb { aspect-ratio: 4 / 3; max-width: 100%; background: var(--surface-2); overflow: hidden; }
+.thumb svg, .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 7px; }
+.card-who { font-weight: 700; line-height: 1.3; }
+.badge { align-self: flex-start; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.uses { display: flex; flex-wrap: wrap; gap: 4px; }
+.use { font-size: 0.72rem; font-weight: 700; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 2px 6px; }
+.empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--rule); border-radius: var(--radius); }
+
+/* Label view */
+.bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.bar h1 { font-size: 1.35rem; }
+.label-grid { display: grid; gap: 18px; }
+@media (min-width: 900px) {
+  .label-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
+  .tag-col { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); }
+}
+.tag-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tagbox { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); cursor: crosshair; touch-action: manipulation; }
+.tagbox svg, .tagbox img { display: block; width: 100%; height: auto; max-width: 100%; }
+.tagbox svg { aspect-ratio: 4 / 3; }
+.marker { position: absolute; transform: translate(-50%, -50%); width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); border: 3px solid var(--surface); font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); padding: 0; }
+.marker-name { position: absolute; transform: translate(-50%, 26px); background: var(--ink); color: var(--bg); font-size: 0.8rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; pointer-events: none; }
+.tap-hint { font-weight: 700; color: var(--accent); }
+.panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.step { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: inline-grid; place-items: center; font-size: 0.85rem; font-family: var(--font-body); flex: none; }
+.status { font-weight: 700; font-size: 0.92rem; color: var(--warn); }
+.status.ok { color: var(--ok); }
+.face-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid var(--rule); }
+.face-row.pending { color: var(--muted); align-items: center; }
+.face-row.pending .num { background: var(--surface-2); color: var(--muted); }
+.face-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.inline-add { display: flex; gap: 8px; }
+.inline-add .input { flex: 1; min-width: 0; }
+.check { display: flex; gap: 10px; align-items: center; font-weight: 700; padding: 4px 0; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+.later { background: transparent; border-style: dashed; }
+.tag { font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; background: var(--mark-soft); color: var(--mark); padding: 3px 8px; border-radius: 999px; }
+.later-fields { display: grid; gap: 10px; }
+@media (min-width: 520px) { .later-fields { grid-template-columns: 1fr 1fr; } }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-weight: 700; color: var(--danger); }
+
+/* People */
+.list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.person { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 12px 14px; flex-wrap: wrap; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: #FFFFFF; font-weight: 800; font-family: var(--font-display); font-size: 1.15rem; flex: none; }
+.person .grow { flex: 1; min-width: 120px; }
+.person .grow b { display: block; font-size: 1.05rem; }
+.person .grow small { color: var(--muted); font-size: 0.88rem; }
+.voice-ok { color: var(--ok); font-weight: 700; font-size: 0.9rem; }
+.rec { color: var(--danger); border-color: var(--danger); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+.add-person { display: flex; gap: 8px; margin-top: 12px; max-width: 460px; }
+.add-person .input { flex: 1; min-width: 0; }
+
+/* Levels */
+.current { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 10px; margin: 16px 0 10px; }
+@media (min-width: 760px) { .current { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); align-items: center; gap: 20px; } }
+.current p { color: var(--muted); font-size: 0.95rem; }
+.levels { display: grid; gap: 14px; margin-top: 16px; }
+@media (min-width: 760px) { .levels { grid-template-columns: 1fr 1fr; } }
+.level { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.level.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.level.off .level-body { opacity: 0.5; }
+.level-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.level-head h2 { margin: 0; flex-wrap: wrap; }
+.level-desc { color: var(--muted); font-size: 0.95rem; margin-top: 4px; }
+.level-body { display: flex; flex-direction: column; gap: 12px; }
+.here { font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 999px; }
+.switch { position: relative; width: 52px; height: 30px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.track { position: absolute; inset: 0; border-radius: 999px; background: var(--rule); transition: background 0.2s; }
+.track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: var(--shadow); transition: transform 0.2s; }
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { transform: translateX(22px); }
+.switch input:focus-visible + .track { outline: 3px solid var(--accent); outline-offset: 2px; }
+.seg-wrap { display: flex; flex-direction: column; gap: 6px; }
+.seg-label { font-size: 0.88rem; font-weight: 700; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 9px; font-weight: 700; font-size: 0.9rem; background: var(--surface); }
+.seg input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.seg input:disabled + span { opacity: 0.45; }
+.ready { align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; font-size: 0.86rem; font-weight: 700; padding: 6px 10px; border-radius: 8px; }
+.ready.ok { background: var(--ok-soft); color: var(--ok); }
+.ready.no { background: var(--warn-soft); color: var(--warn); }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 20; max-width: calc(100% - 32px); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dot { animation: none; }
+  .track, .track::after { transition: none; }
+}
+</style>
+
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<datalist id="actions">
+  <option value="eating"></option><option value="drinking"></option><option value="sleeping"></option>
+  <option value="reading"></option><option value="playing"></option><option value="hugging"></option>
+  <option value="cooking"></option><option value="driving"></option>
+</datalist>
+
+<script>
+(function () {
+  "use strict";
+  var app = document.getElementById("app");
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2600);
+  }
+
+  /* Example illustrations stand in for real family photos. */
+  var FIG = {
+    dad: { shirt: "#2D6E8E", hair: "#2B1D14", skin: "#A8714A" },
+    mum: { shirt: "#C9822B", hair: "#1F1510", skin: "#C08A5E" },
+    gma: { shirt: "#7A5CA8", hair: "#BDB7B0", skin: "#9A6644" },
+    kid: { shirt: "#4F7A5A", hair: "#2A1E16", skin: "#B98256" }
+  };
+  function fig(x, k) { var f = FIG[k]; return { x: x, shirt: f.shirt, hair: f.hair, skin: f.skin }; }
+  function sceneSVG(s, label) {
+    var g = '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + esc(label) + '">';
+    g += '<rect width="400" height="300" fill="' + s.bg + '"/>';
+    g += '<rect y="230" width="400" height="70" fill="' + s.floor + '"/>';
+    if (s.windowX != null) g += '<rect x="' + s.windowX + '" y="36" width="72" height="62" rx="6" fill="#CFE6F2" stroke="#FFFFFF" stroke-width="6"/>';
+    if (s.tree) g += '<rect x="352" y="118" width="16" height="114" fill="#7A5A3C"/><circle cx="360" cy="100" r="40" fill="#5E9E5A"/>';
+    s.figures.forEach(function (f) {
+      var x = f.x;
+      g += '<path d="M' + (x - 58) + ' 300 C ' + (x - 56) + ' 200, ' + (x - 30) + ' 168, ' + x + ' 168 S ' + (x + 56) + ' 200, ' + (x + 58) + ' 300 Z" fill="' + f.shirt + '"/>';
+      g += '<rect x="' + (x - 9) + '" y="140" width="18" height="30" fill="' + f.skin + '"/>';
+      g += '<circle cx="' + x + '" cy="120" r="30" fill="' + f.skin + '"/>';
+      g += '<path d="M' + (x - 31) + ' 118 C ' + (x - 32) + ' 82, ' + (x + 32) + ' 82, ' + (x + 31) + ' 118 C ' + (x + 20) + ' 100, ' + (x - 20) + ' 100, ' + (x - 31) + ' 118 Z" fill="' + f.hair + '"/>';
+    });
+    var x0 = s.figures[0].x;
+    if (s.prop === "bowl") g += '<path d="M' + (x0 - 46) + ' 250 h92 a46 30 0 0 1 -92 0z" fill="#FFFFFF" stroke="#CBB48E" stroke-width="3"/>';
+    if (s.prop === "book") g += '<rect x="' + (x0 - 34) + '" y="205" width="68" height="48" rx="4" fill="#B5473A"/><rect x="' + (x0 - 2) + '" y="205" width="4" height="48" fill="#8E3328"/>';
+    if (s.prop === "zz") g += '<text x="' + (x0 + 40) + '" y="90" font-size="28" font-weight="700" fill="#6B5A8E" font-family="sans-serif">z z</text>';
+    if (s.prop === "table") {
+      g += '<rect x="0" y="238" width="400" height="62" fill="#B08560"/><rect x="0" y="232" width="400" height="10" fill="#C79B72"/>';
+      s.figures.forEach(function (f) { g += '<ellipse cx="' + f.x + '" cy="240" rx="24" ry="7" fill="#FFFFFF"/>'; });
+    }
+    return g + "</svg>";
+  }
+
+  var state = {
+    view: "photos",
+    filter: "all",
+    draft: null,
+    confirmDelete: false,
+    newPersonFor: null,
+    people: [
+      { id: "mum", name: "Mummy", voice: "done" },
+      { id: "dad", name: "Daddy", voice: "done" },
+      { id: "gma", name: "Grandma", voice: "none" }
+    ],
+    photos: [
+      { id: "p1", kind: "sample", title: "Daddy at lunch", scene: { bg: "#F4E6D3", floor: "#DCC3A0", figures: [fig(200, "dad")], prop: "bowl", windowX: 296 },
+        count: 1, faces: [{ x: 50, y: 40, personId: "dad", action: "eating" }], off: {} },
+      { id: "p2", kind: "sample", title: "Mummy reading", scene: { bg: "#DDEBF2", floor: "#B9CFDB", figures: [fig(200, "mum")], prop: "book" },
+        count: 1, faces: [{ x: 50, y: 40, personId: "mum", action: "reading" }], off: {} },
+      { id: "p3", kind: "sample", title: "Grandma resting", scene: { bg: "#E8E2F1", floor: "#CDC3DD", figures: [fig(200, "gma")], prop: "zz" },
+        count: 1, faces: [{ x: 50, y: 40, personId: "gma", action: "sleeping" }], off: {} },
+      { id: "p4", kind: "sample", title: "Mummy and Daddy", scene: { bg: "#E3F0E4", floor: "#C3DBC6", figures: [fig(140, "mum"), fig(260, "dad")], windowX: 318 },
+        count: 2, faces: [{ x: 35, y: 40, personId: "mum", action: "" }, { x: 65, y: 40, personId: "dad", action: "" }], off: {} },
+      { id: "p5", kind: "sample", title: "Dinner together", scene: { bg: "#F6E3D6", floor: "#E0C4AE", figures: [fig(85, "gma"), fig(200, "dad"), fig(315, "mum")], prop: "table" },
+        count: 3, faces: [{ x: 21.25, y: 40, personId: "gma", action: "eating" }, { x: 50, y: 40, personId: "dad", action: "eating" }, { x: 78.75, y: 40, personId: "mum", action: "eating" }], off: {} },
+      { id: "p6", kind: "sample", title: "At the park", scene: { bg: "#DCEFE9", floor: "#9CCB8E", figures: [fig(130, "dad"), fig(250, "kid")], tree: true },
+        count: null, faces: [], off: {} }
+    ],
+    level: 2,
+    levels: {
+      1: { on: true, questions: 10 },
+      2: { on: true, layout: "separate", questions: 10 },
+      3: { on: true, layout: "separate", questions: 10 },
+      4: { on: false, layout: "group", questions: 10, howMany: 4 }
+    }
+  };
+
+  var AVATAR = ["#1B6683", "#A86A12", "#6B4FA0", "#2B7A4B", "#9A4A4A", "#3E5C76"];
+  var USE_LONG = {
+    l1: "Level 1 · Who is this?",
+    sep: "Levels 2–4 · as one of the separate photos",
+    g2: "Level 2 · as a group photo",
+    g3: "Level 3 · as a group photo",
+    g4: "Level 4 · as a group photo"
+  };
+  var USE_SHORT = { l1: "L1 Who is this?", sep: "Separate photos", g2: "Group · L2", g3: "Group · L3", g4: "Group · L4" };
+  var LV = {
+    1: { name: "Who is this?", desc: "One photo of one person. The app asks “Who is this?”. He says the name and you mark it." },
+    2: { name: "2 people", desc: "“Where’s Daddy?” He picks between 2 people." },
+    3: { name: "3 people", desc: "“Where’s Daddy?” He picks between 3 people." },
+    4: { name: "Many people", desc: "“Where’s Daddy?” He picks among 4 or more people." }
+  };
+
+  function personName(id) {
+    for (var i = 0; i < state.people.length; i++) if (state.people[i].id === id) return state.people[i].name;
+    return "";
+  }
+  function usage(p) {
+    var named = p.faces.filter(function (f) { return f.personId; }).length;
+    var complete = !!p.count && p.faces.length === p.count && named === p.count;
+    if (!complete) return { complete: false, keys: [] };
+    if (p.count === 1) return { complete: true, keys: ["l1", "sep"] };
+    if (p.count === 2) return { complete: true, keys: ["g2"] };
+    if (p.count === 3) return { complete: true, keys: ["g3"] };
+    return { complete: true, keys: ["g4"] };
+  }
+  function activeKeys(p) { return usage(p).keys.filter(function (k) { return !p.off[k]; }); }
+  function photosWith(key) { return state.photos.filter(function (p) { return activeKeys(p).indexOf(key) !== -1; }); }
+  function singlePeople() {
+    var set = {};
+    photosWith("sep").forEach(function (p) { set[p.faces[0].personId] = true; });
+    return Object.keys(set).length;
+  }
+  function readiness(n) {
+    var L = state.levels[n];
+    if (n === 1) {
+      var c = photosWith("l1").length;
+      return c ? { ok: true, text: "Ready · " + c + " photos of one person" } : { ok: false, text: "Add a photo with one person in it" };
+    }
+    var need = n === 4 ? L.howMany : n;
+    var sp = singlePeople();
+    var sepOk = sp >= need;
+    var gc = photosWith("g" + n).length;
+    var who = n === 4 ? "4 or more" : String(n);
+    var sepText = sepOk ? "Ready · " + sp + " people have their own photos" : "Needs own photos of " + need + " people (you have " + sp + ")";
+    var groupText = gc ? "Ready · " + gc + " group photo" + (gc > 1 ? "s" : "") + " with " + who + " people" : "Needs a photo with " + who + " people in it";
+    if (L.layout === "separate") return { ok: sepOk, text: sepText };
+    if (L.layout === "group") return { ok: gc > 0, text: groupText };
+    var ok = sepOk && gc > 0;
+    return { ok: ok, text: ok ? "Ready for both kinds" : (!sepOk ? sepText : groupText) };
+  }
+
+  function media(p) {
+    if (p.kind === "own") return '<img src="' + esc(p.src) + '" alt="' + esc(p.title) + '">';
+    return sceneSVG(p.scene, p.title);
+  }
+  function countLabel(n) { return n >= 5 ? "5+ people" : n === 1 ? "1 person" : n + " people"; }
+
+  /* ---------- Views ---------- */
+  function renderTop() {
+    return '<p class="proto">Prototype with example photos. A photo you add here stays on this page only. Nothing is uploaded or saved.</p>' +
+      '<header class="top"><div class="brand"><b>Who Is It?</b><span>Parent mode</span></div>' +
+      '<span class="drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z" fill="none"/></svg>Google Drive connected</span></header>';
+  }
+  function renderTabs() {
+    var tabs = [["photos", "Photos"], ["people", "People"], ["levels", "Levels"]];
+    return '<nav class="tabs" aria-label="Parent mode">' + tabs.map(function (t) {
+      return '<button type="button" class="tab" data-action="view" data-view="' + t[0] + '"' + (state.view === t[0] ? ' aria-current="page"' : "") + ">" + t[1] + "</button>";
+    }).join("") + "</nav>";
+  }
+
+  function renderPhotos() {
+    var f = state.filter;
+    var list = state.photos.filter(function (p) {
+      var u = usage(p);
+      if (f === "needs") return !u.complete;
+      if (f === "1") return u.complete && p.count === 1;
+      if (f === "2") return u.complete && p.count === 2;
+      if (f === "3") return u.complete && p.count >= 3;
+      return true;
+    });
+    var needs = state.photos.filter(function (p) { return !usage(p).complete; }).length;
+    var filters = [["all", "All (" + state.photos.length + ")"], ["needs", "Needs labels (" + needs + ")"], ["1", "1 person"], ["2", "2 people"], ["3", "3+ people"]];
+    var cards = list.map(function (p) {
+      var u = usage(p);
+      var names = p.faces.filter(function (x) { return x.personId; }).map(function (x) { return personName(x.personId); });
+      var who = names.length ? names.join(" & ") : "No labels yet";
+      if (u.complete && p.count === 1 && p.faces[0].action) who += " · " + p.faces[0].action;
+      var badge = u.complete ? '<span class="badge">' + countLabel(p.count) + "</span>" : '<span class="badge warn">Needs labels</span>';
+      var uses = activeKeys(p).map(function (k) { return '<span class="use">' + USE_SHORT[k] + "</span>"; }).join("");
+      return '<button type="button" class="card" data-action="open" data-id="' + p.id + '"><div class="thumb">' + media(p) + '</div><div class="card-body"><span class="card-who">' + esc(who) + "</span>" + badge + (uses ? '<div class="uses">' + uses + "</div>" : "") + "</div></button>";
+    }).join("");
+    return '<section><div class="row-head"><h1>Photo library</h1>' +
+      '<label class="btn primary" for="file-input">Add photos</label>' +
+      '<input id="file-input" type="file" accept="image/*" multiple hidden></div>' +
+      '<p class="hint">Each photo is saved once to a private folder in your Google Drive. Its labels decide which levels can use it.</p>' +
+      '<div class="chips filters" role="group" aria-label="Show">' + filters.map(function (x) {
+        return '<button type="button" class="chip small" data-action="filter" data-f="' + x[0] + '" aria-pressed="' + (f === x[0]) + '">' + x[1] + "</button>";
+      }).join("") + "</div>" +
+      (cards ? '<div class="grid">' + cards + "</div>" : '<p class="empty">No photos here yet.</p>') + "</section>";
+  }
+
+  function renderLabel() {
+    var d = state.draft;
+    var u = usage(d);
+    var named = d.faces.filter(function (f) { return f.personId; }).length;
+
+    var markers = d.faces.map(function (f, i) {
+      return '<button type="button" class="marker" style="left:' + f.x + "%;top:" + f.y + '%" data-action="remove-face" data-i="' + i + '" aria-label="Remove face ' + (i + 1) + '">' + (i + 1) + "</button>" +
+        (f.personId ? '<span class="marker-name" style="left:' + f.x + "%;top:" + f.y + '%">' + esc(personName(f.personId)) + "</span>" : "");
+    }).join("");
+
+    var tapHint;
+    if (!d.count) tapHint = "Start with step 1: how many people are in the photo?";
+    else if (d.faces.length < d.count) tapHint = "Tap the face of person " + (d.faces.length + 1) + ".";
+    else tapHint = "All faces tapped. Tap a number to remove it.";
+
+    var countChips = [1, 2, 3, 4, 5].map(function (n) {
+      return '<button type="button" class="chip" data-action="count" data-n="' + n + '" aria-pressed="' + (d.count === n) + '">' + (n === 5 ? "5+" : n) + "</button>";
+    }).join("");
+
+    var step2;
+    if (!d.count) {
+      step2 = '<p class="hint">Choose how many people are in the photo first.</p>';
+    } else {
+      var done = d.faces.length === d.count && named === d.count;
+      step2 = '<p class="status' + (done ? " ok" : "") + '">' + d.faces.length + " of " + d.count + " faces tapped · " + named + " named</p>";
+      step2 += d.faces.map(function (f, i) {
+        var chips = state.people.map(function (p) {
+          var taken = d.faces.some(function (g, j) { return j !== i && g.personId === p.id; });
+          return '<button type="button" class="chip" data-action="assign" data-i="' + i + '" data-p="' + p.id + '" aria-pressed="' + (f.personId === p.id) + '"' + (taken ? " disabled" : "") + ">" + esc(p.name) + "</button>";
+        }).join("");
+        var add = state.newPersonFor === i
+          ? '<div class="inline-add"><input class="input" id="np-input" placeholder="Name, for example Aunty" autocomplete="off"><button type="button" class="btn primary" data-action="add-person-face" data-i="' + i + '">Add</button></div>'
+          : "";
+        return '<div class="face-row"><span class="num">' + (i + 1) + '</span><div class="face-fields">' +
+          '<div class="chips" role="group" aria-label="Who is face ' + (i + 1) + '?">' + chips +
+          '<button type="button" class="chip add" data-action="new-person" data-i="' + i + '">+ New person</button></div>' + add +
+          '<label class="field" for="act-' + i + '">What is ' + (f.personId ? esc(personName(f.personId)) : "this person") + ' doing? (optional)' +
+          '<input class="input" id="act-' + i + '" list="actions" data-face-action="' + i + '" value="' + esc(f.action) + '" placeholder="eating, sleeping, reading"></label>' +
+          "</div></div>";
+      }).join("");
+      for (var k = d.faces.length; k < d.count; k++) {
+        step2 += '<div class="face-row pending"><span class="num">' + (k + 1) + "</span><span>Tap this person’s face on the photo</span></div>";
+      }
+    }
+
+    var step3;
+    if (!u.complete) {
+      step3 = '<p class="hint">Finish steps 1 and 2. The app then shows which levels can use this photo.</p>';
+    } else {
+      var why = d.count === 1
+        ? "A photo of one person can be the “Who is this?” photo, and one of the separate photos he chooses from."
+        : "A photo with " + countLabel(d.count) + " is a group photo. He finds the named person inside it.";
+      step3 = '<p class="hint">' + why + "</p>" + u.keys.map(function (k) {
+        return '<label class="check" for="use-' + k + '"><input type="checkbox" id="use-' + k + '" data-use="' + k + '"' + (d.off[k] ? "" : " checked") + ">" + USE_LONG[k] + "</label>";
+      }).join("");
+    }
+
+    var del = state.confirmDelete
+      ? '<span class="confirm">Delete this photo from Google Drive? <button type="button" class="btn danger solid" data-action="delete-yes">Delete</button><button type="button" class="btn" data-action="delete-no">Keep</button></span>'
+      : '<button type="button" class="btn danger" data-action="delete">Delete photo</button>';
+
+    return '<section><div class="bar"><button type="button" class="btn ghost" data-action="back">← Photos</button><h1>Label this photo</h1></div>' +
+      '<div class="label-grid">' +
+      '<div class="tag-col"><div class="tagbox" data-action="tap">' + media(d) + markers + "</div>" +
+      '<p class="tap-hint">' + tapHint + "</p></div>" +
+      '<div class="panel">' +
+      '<div class="step"><h2><span class="num">1</span>How many people are in this photo?</h2><div class="chips" role="group" aria-label="Number of people">' + countChips + "</div></div>" +
+      '<div class="step"><h2><span class="num">2</span>Tap each face, then choose who it is</h2>' + step2 + "</div>" +
+      '<div class="step"><h2><span class="num">3</span>Use this photo in</h2>' + step3 + "</div>" +
+      '<div class="step later"><h2>What and Where <span class="tag">Later</span></h2>' +
+      '<p class="hint">When those levels are added, you label things and the place in this same photo. It is not uploaded again.</p>' +
+      '<div class="later-fields"><label class="field" for="later-what">Things in the photo<input class="input" id="later-what" disabled placeholder="plate, spoon"></label>' +
+      '<label class="field" for="later-where">Place<input class="input" id="later-where" disabled placeholder="kitchen"></label></div></div>' +
+      '<div class="actions"><button type="button" class="btn primary" data-action="save">Save</button><button type="button" class="btn" data-action="back">Cancel</button>' + del + "</div>" +
+      "</div></div></section>";
+  }
+
+  function renderPeople() {
+    var rows = state.people.map(function (p, i) {
+      var n = state.photos.filter(function (ph) { return ph.faces.some(function (f) { return f.personId === p.id; }); }).length;
+      var voice;
+      if (p.voice === "rec") voice = '<button type="button" class="btn rec" data-action="voice" data-p="' + p.id + '"><span class="dot" aria-hidden="true"></span>Recording… tap to stop</button>';
+      else if (p.voice === "done") voice = '<span class="voice-ok">✓ Name recorded</span><button type="button" class="btn ghost" data-action="voice" data-p="' + p.id + '">Re-record</button>';
+      else voice = '<button type="button" class="btn" data-action="voice" data-p="' + p.id + '">Record name</button>';
+      return '<div class="person"><span class="avatar" style="background:' + AVATAR[i % AVATAR.length] + '" aria-hidden="true">' + esc(p.name.charAt(0)) + '</span>' +
+        '<div class="grow"><b>' + esc(p.name) + "</b><small>" + n + " photo" + (n === 1 ? "" : "s") + (n < 3 ? " · add a few more" : "") + "</small></div>" + voice + "</div>";
+    }).join("");
+    return '<section><h1>People</h1>' +
+      '<p class="hint" style="margin-top:8px">Record each name in your own voice, in any language. The app plays it as the answer. Three to five different photos of each person help him learn the person, not one picture.</p>' +
+      '<div class="list">' + rows + "</div>" +
+      '<div class="add-person"><input class="input" id="np-main" placeholder="Add a person, for example Teacher" autocomplete="off" aria-label="New person’s name"><button type="button" class="btn primary" data-action="add-person">Add</button></div></section>';
+  }
+
+  function seg(n, field, options, current, disabled) {
+    return '<div class="seg" role="radiogroup">' + options.map(function (o) {
+      var id = "lv" + n + "-" + field + "-" + o[0];
+      return '<label for="' + id + '"><input type="radio" id="' + id + '" name="lv' + n + "-" + field + '" value="' + o[0] + '" data-level="' + n + '" data-field="' + field + '"' + (String(current) === String(o[0]) ? " checked" : "") + (disabled ? " disabled" : "") + "><span>" + o[1] + "</span></label>";
+    }).join("") + "</div>";
+  }
+
+  function renderLevels() {
+    var opts = [1, 2, 3, 4].map(function (n) {
+      return '<option value="' + n + '"' + (state.level === n ? " selected" : "") + ">Level " + n + " · " + LV[n].name + "</option>";
+    }).join("");
+    var cards = [1, 2, 3, 4].map(function (n) {
+      var L = state.levels[n];
+      var r = readiness(n);
+      var body = "";
+      if (n > 1) {
+        body += '<div class="seg-wrap"><span class="seg-label">Show as</span>' + seg(n, "layout", [["separate", "Separate photos"], ["group", "Group photo"], ["mixed", "Mixed"]], L.layout, !L.on) + "</div>";
+      }
+      if (n === 4) {
+        body += '<div class="seg-wrap"><span class="seg-label">People to choose from (separate photos)</span>' + seg(n, "howMany", [[4, "4"], [5, "5"], [6, "6"]], L.howMany, !L.on || L.layout === "group") + "</div>";
+      }
+      body += '<div class="seg-wrap"><span class="seg-label">Questions per session</span>' + seg(n, "questions", [[5, "5"], [10, "10"], [15, "15"]], L.questions, !L.on) + "</div>";
+      body += '<span class="ready ' + (r.ok ? "ok" : "no") + '">' + esc(r.text) + "</span>";
+      return '<div class="level' + (L.on ? "" : " off") + (state.level === n ? " is-current" : "") + '">' +
+        '<div class="level-head"><div><h2>Level ' + n + " · " + LV[n].name + (state.level === n ? ' <span class="here">He is here</span>' : "") + "</h2>" +
+        '<p class="level-desc">' + LV[n].desc + "</p></div>" +
+        '<label class="switch" for="lv' + n + '-on" title="Turn level ' + n + ' on or off"><input type="checkbox" id="lv' + n + '-on" data-level="' + n + '" data-field="on"' + (L.on ? " checked" : "") + ' aria-label="Level ' + n + ' on"><span class="track"></span></label></div>' +
+        '<div class="level-body">' + body + "</div></div>";
+    }).join("");
+    return '<section><h1>Levels</h1>' +
+      '<div class="current"><label class="field" for="cur-level">He is playing<select class="input" id="cur-level">' + opts + "</select></label>" +
+      "<p>You decide when he moves up. The app shows <b>Ready to move up</b> when he gets 9 of 10 right on his own, two sessions in a row.</p></div>" +
+      '<p class="hint">Every session shuffles the questions, which photo of each person appears, and where the right answer sits on the screen.</p>' +
+      '<div class="levels">' + cards + "</div></section>";
+  }
+
+  function render() {
+    var body;
+    if (state.view === "label") body = renderLabel();
+    else if (state.view === "people") body = renderPeople();
+    else if (state.view === "levels") body = renderLevels();
+    else body = renderPhotos();
+    app.innerHTML = renderTop() + (state.view === "label" ? "" : renderTabs()) + "<main>" + body + "</main>";
+    if (state.newPersonFor !== null) {
+      var np = document.getElementById("np-input");
+      if (np) np.focus();
+    }
+  }
+
+  function openPhoto(id) {
+    var p = state.photos.filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    state.draft = clone(p);
+    state.confirmDelete = false;
+    state.newPersonFor = null;
+    state.view = "label";
+    render();
+    window.scrollTo(0, 0);
+  }
+  function addPerson(name) {
+    var p = { id: uid(), name: name, voice: "none" };
+    state.people.push(p);
+    return p;
+  }
+
+  /* ---------- Events ---------- */
+  app.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-action]");
+    if (!el) return;
+    var a = el.getAttribute("data-action");
+    var d = state.draft;
+    var i = parseInt(el.getAttribute("data-i"), 10);
+
+    if (a === "view") { state.view = el.getAttribute("data-view"); render(); return; }
+    if (a === "filter") { state.filter = el.getAttribute("data-f"); render(); return; }
+    if (a === "open") { openPhoto(el.getAttribute("data-id")); return; }
+    if (a === "back") { state.view = "photos"; state.draft = null; state.newPersonFor = null; render(); return; }
+
+    if (a === "tap") {
+      if (!d.count) { toast("First choose how many people are in the photo."); return; }
+      if (d.faces.length >= d.count) { toast("All faces are tapped. Tap a number to remove it."); return; }
+      var r = el.getBoundingClientRect();
+      var x = Math.min(100, Math.max(0, (e.clientX - r.left) / r.width * 100));
+      var y = Math.min(100, Math.max(0, (e.clientY - r.top) / r.height * 100));
+      d.faces.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, personId: null, action: "" });
+      render();
+      return;
+    }
+    if (a === "remove-face") { d.faces.splice(i, 1); state.newPersonFor = null; render(); return; }
+    if (a === "count") {
+      d.count = parseInt(el.getAttribute("data-n"), 10);
+      if (d.faces.length > d.count) d.faces = d.faces.slice(0, d.count);
+      d.off = {};
+      render();
+      return;
+    }
+    if (a === "assign") {
+      var pid = el.getAttribute("data-p");
+      d.faces[i].personId = d.faces[i].personId === pid ? null : pid;
+      render();
+      return;
+    }
+    if (a === "new-person") { state.newPersonFor = state.newPersonFor === i ? null : i; render(); return; }
+    if (a === "add-person-face") {
+      var inp = document.getElementById("np-input");
+      var nm = inp ? inp.value.trim() : "";
+      if (!nm) { toast("Type a name first."); if (inp) inp.focus(); return; }
+      var np = addPerson(nm);
+      d.faces[i].personId = np.id;
+      state.newPersonFor = null;
+      render();
+      toast(nm + " added to People");
+      return;
+    }
+    if (a === "save") {
+      for (var k = 0; k < state.photos.length; k++) if (state.photos[k].id === d.id) state.photos[k] = d;
+      var done = usage(d).complete;
+      state.view = "photos"; state.draft = null; state.newPersonFor = null;
+      render();
+      toast(done ? "Saved to Google Drive" : "Saved. This photo still needs labels.");
+      return;
+    }
+    if (a === "delete") { state.confirmDelete = true; render(); return; }
+    if (a === "delete-no") { state.confirmDelete = false; render(); return; }
+    if (a === "delete-yes") {
+      state.photos = state.photos.filter(function (p) { return p.id !== d.id; });
+      state.view = "photos"; state.draft = null;
+      render();
+      toast("Deleted from Google Drive");
+      return;
+    }
+    if (a === "voice") {
+      var person = state.people.filter(function (p) { return p.id === el.getAttribute("data-p"); })[0];
+      if (person.voice === "rec") { person.voice = "done"; toast(person.name + "’s name recorded"); }
+      else person.voice = "rec";
+      render();
+      return;
+    }
+    if (a === "add-person") {
+      var m = document.getElementById("np-main");
+      var name = m ? m.value.trim() : "";
+      if (!name) { toast("Type a name first."); if (m) m.focus(); return; }
+      addPerson(name);
+      render();
+      toast(name + " added. Now add photos of them.");
+      return;
+    }
+  });
+
+  app.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    if (e.target.id === "np-input") {
+      var btn = app.querySelector('[data-action="add-person-face"]');
+      if (btn) btn.click();
+    } else if (e.target.id === "np-main") {
+      var b = app.querySelector('[data-action="add-person"]');
+      if (b) b.click();
+    }
+  });
+
+  app.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.hasAttribute("data-face-action") && state.draft) {
+      state.draft.faces[parseInt(t.getAttribute("data-face-action"), 10)].action = t.value;
+    }
+  });
+
+  app.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "file-input") {
+      var files = Array.prototype.slice.call(t.files || []);
+      if (!files.length) return;
+      var added = files.map(function (f) {
+        var p = { id: uid(), kind: "own", src: URL.createObjectURL(f), title: f.name, count: null, faces: [], off: {} };
+        state.photos.unshift(p);
+        return p;
+      });
+      state.filter = "all";
+      if (added.length === 1) { openPhoto(added[0].id); toast("Photo added. Now label it."); }
+      else { render(); toast(added.length + " photos added. Tap each one to label it."); }
+      return;
+    }
+    if (t.hasAttribute("data-use") && state.draft) {
+      state.draft.off[t.getAttribute("data-use")] = !t.checked;
+      return;
+    }
+    if (t.id === "cur-level") { state.level = parseInt(t.value, 10); render(); return; }
+    if (t.hasAttribute("data-level")) {
+      var L = state.levels[t.getAttribute("data-level")];
+      var field = t.getAttribute("data-field");
+      if (field === "on") L.on = t.checked;
+      else if (field === "layout") L.layout = t.value;
+      else L[field] = parseInt(t.value, 10);
+      render();
+    }
+  });
+
+  render();
+})();
+</script>
