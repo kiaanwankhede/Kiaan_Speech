@@ -1,0 +1,620 @@
+<title>Who-Question App Research</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600..800&display=swap">
+<style>
+/* Layout: one calm reading column (68ch) inside an 880px frame; tables and the choice-screen sketch use the full frame. */
+:root {
+  --bg: #F4F7F9;
+  --surface: #FFFFFF;
+  --ink: #16202B;
+  --muted: #566374;
+  --rule: #D6DEE6;
+  --accent: #1B6683;
+  --accent-soft: #E1EEF3;
+  --mark: #A86A12;
+  --mark-soft: #FAEFD9;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: clamp(2rem, 1.4rem + 2.6vw, 3rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E131A; --surface: #151C25; --ink: #E5EAF0; --muted: #9AA7B5; --rule: #283341;
+    --accent: #72BAD6; --accent-soft: #142E39; --mark: #E2B159; --mark-soft: #2E2410;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E131A; --surface: #151C25; --ink: #E5EAF0; --muted: #9AA7B5; --rule: #283341;
+  --accent: #72BAD6; --accent-soft: #142E39; --mark: #E2B159; --mark-soft: #2E2410;
+  color-scheme: dark;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.frame { max-width: 880px; margin: 0 auto; padding-block: 2.5rem 4rem; }
+.prose > p, .prose > ul, .prose > ol, .prose > h2, .prose > h3, .lead-block p { max-width: 68ch; }
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; letter-spacing: -0.01em; color: var(--ink); }
+h1 { font-size: var(--step-3); font-weight: 800; margin: 0 0 1.25rem; }
+h2 { font-size: var(--step-2); font-weight: 700; margin: 3.5rem 0 1rem; padding-top: 1.75rem; border-top: 1px solid var(--rule); scroll-margin-top: 1rem; }
+h3 { font-size: var(--step-1); font-weight: 700; margin: 2.25rem 0 0.75rem; }
+p { margin: 0 0 1rem; }
+ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+li > ul { margin-top: 0.35rem; margin-bottom: 0; }
+strong { font-weight: 700; }
+em { font-style: italic; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+.eyebrow { font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.75rem; font-weight: 700; }
+
+/* Hero */
+.hero { display: grid; gap: 1.75rem; }
+@media (min-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr) 190px; align-items: start; gap: 2.5rem; } }
+.lead-block { min-width: 0; }
+.lead-block p { font-size: 1.12rem; }
+.cue-figure { margin: 0; }
+.cues { display: flex; gap: 12px; }
+@media (min-width: 760px) { .cues { flex-direction: column; margin-top: 0.5rem; } }
+.cue { flex: 1; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 10px 12px; text-align: center; }
+.cue svg { width: 60px; height: 60px; display: block; margin: 0 auto 6px; }
+.cue b { font-family: var(--font-display); font-weight: 800; letter-spacing: 0.08em; font-size: 0.95rem; display: block; }
+.cue span { font-size: 0.8rem; color: var(--muted); }
+.cue--who svg { color: var(--accent); }
+.cue--what svg { color: var(--mark); }
+.cue-figure figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 10px; line-height: 1.45; }
+
+/* Four changes */
+.changes-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 700; margin: 2.5rem 0 1rem; }
+.changes { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .changes { grid-template-columns: 1fr 1fr; } }
+.change { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.change h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.change p { margin: 0; color: var(--muted); font-size: 0.98rem; }
+
+/* Contents */
+.toc { margin: 2.75rem 0 0; }
+.toc ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+.toc li { margin: 0; }
+.toc a { text-decoration: none; font-weight: 700; }
+.toc a:hover { text-decoration: underline; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 1.25rem 0 1.75rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 660px; font-size: 0.9rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { background: var(--accent-soft); font-weight: 700; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 700; }
+
+/* Choice-screen sketch */
+.mock { margin: 1.5rem 0 2.25rem; display: grid; gap: 1.5rem; align-items: center; }
+@media (min-width: 720px) { .mock { grid-template-columns: 330px minmax(0, 1fr); } }
+.screen { background: var(--surface); border: 1px solid var(--rule); border-radius: 24px; padding: 18px 16px 16px; width: 100%; max-width: 340px; box-sizing: border-box; }
+.screen-q { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0 0 14px; }
+.screen-q svg { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: center; }
+.choice { border: 2px solid var(--rule); border-radius: 12px; padding: 8px 4px 7px; text-align: center; background: var(--bg); color: var(--muted); }
+.choice svg { width: 100%; max-width: 64px; height: auto; display: block; margin: 0 auto 4px; }
+.choice span { display: block; font-size: 0.78rem; line-height: 1.25; }
+.choice.is-answer { border-color: var(--mark); background: var(--mark-soft); color: var(--mark); transform: scale(1.08); }
+.choice.is-answer span { color: var(--ink); font-weight: 700; }
+.dots { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+.dots i.done { background: var(--accent); }
+.screen-note { font-size: 0.78rem; color: var(--muted); text-align: center; margin: 8px 0 0; }
+.mock figcaption { min-width: 0; }
+.mock figcaption p { font-weight: 700; margin-bottom: 0.5rem; }
+.mock figcaption ul { margin: 0; }
+
+.foot { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--step--1); max-width: 68ch; }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<main class="frame">
+  <header class="hero">
+    <div class="lead-block">
+      <p class="eyebrow">Research report · 26 November 2026</p>
+      <h1>Family photos fill the gap WH apps left</h1>
+      <p>No maintained app does what this parent has in mind. About 20 dedicated WH-question apps are still listed in the US App Store. Most are iPad tools for speech therapists that were last updated between 2015 and 2017. Every one teaches "who" with stock pictures of strangers and occupations ("Who flies an airplane? …a pilot") rather than the child's own family. The closest, Hamaguchi's Fun with Who, What &amp; Where, lets a parent upload one face into a single activity and has not been updated since 2020. The big autism and speech platforms either charge $60–$165 a year and skip WH-questions (Otsimo, Speech Blubs) or are poorly maintained (Camp Discovery). AAC apps ($150–$300) accept family photos, but they are communication boards, not quiz trainers.</p>
+      <p>Clinically, the idea holds up as long as it stays a short, shared, purposeful tool. The AAP, the Indian Academy of Pediatrics, the WHO and the Canadian Paediatric Society all advise no screens before about age 2. From 2 to 5 they advise about an hour a day at most, with a parent alongside, and the Indian Academy of Pediatrics adds that each session should last no more than 20–30 minutes. The AAP's 2026 policy moves the focus to design and warns against autoplay and rewards built to prolong play. The evidence shows that apps can teach single skills but rarely change everyday communication on their own, so this app has to lead into practice in real life.</p>
+    </div>
+    <figure class="cue-figure" aria-label="Who and what cue cards">
+      <div class="cues">
+        <div class="cue cue--who">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+            <circle cx="32" cy="32" r="22" fill="none"/>
+            <circle cx="24" cy="28" r="2.6" fill="currentColor" stroke="none"/>
+            <circle cx="40" cy="28" r="2.6" fill="currentColor" stroke="none"/>
+            <path d="M23 39c5 5.5 13 5.5 18 0" fill="none"/>
+          </svg>
+          <b>WHO</b>
+          <span>a person</span>
+        </div>
+        <div class="cue cue--what">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 24h28v15a12 12 0 0 1-12 12h-4a12 12 0 0 1-12-12z" fill="none"/>
+            <path d="M43 28h4a6 6 0 0 1 0 12h-4" fill="none"/>
+            <path d="M24 9c-2.5 3 2.5 5 0 9M33 9c-2.5 3 2.5 5 0 9" fill="none"/>
+          </svg>
+          <b>WHAT</b>
+          <span>a thing</span>
+        </div>
+      </div>
+      <figcaption>Optional cue icons for the mixing stage: a face outline for "who", an object outline for "what". They fade once he is answering reliably.</figcaption>
+    </figure>
+  </header>
+
+  <section aria-labelledby="changes-title">
+    <p class="changes-title" id="changes-title">Four changes would turn the working idea into a teaching tool</p>
+    <div class="changes">
+      <div class="change">
+        <h3>Use three picture choices, not a fixed two</h3>
+        <p>With two choices, a child who always taps the same side is right half the time.</p>
+      </div>
+      <div class="change">
+        <h3>Build in help that fades</h3>
+        <p>Start by showing the answer, then wait a little longer each time before helping.</p>
+      </div>
+      <div class="change">
+        <h3>Mix "who" with "what" questions</h3>
+        <p>Asking both about the same photo forces the child to attend to the question word itself.</p>
+      </div>
+      <div class="change">
+        <h3>Save the big celebration for answers given without help</h3>
+        <p>A brief "Yes, Daddy" is enough for an answer he got with help.</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="Contents">
+    <p class="eyebrow">Contents</p>
+    <ol>
+      <li><a href="#twenty-wh-apps-survive-most-abandoned-and-all-built-on-strangers">Twenty WH apps survive, most abandoned and all built on strangers</a></li>
+      <li><a href="#big-platforms-and-aac-apps-each-solve-one-piece">Big platforms and AAC apps each solve one piece</a></li>
+      <li><a href="#reviewers-reward-real-photos-and-punish-broken-purchases">Reviewers reward real photos and punish broken purchases</a></li>
+      <li><a href="#clinicians-back-short-shared-practice-that-ends-in-real-life">Clinicians back short, shared practice that ends in real life</a></li>
+      <li><a href="#four-changes-turn-the-working-idea-into-a-teaching-tool">Four changes turn the working idea into a teaching tool</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+    </ol>
+  </nav>
+
+  <article class="prose">
+<h2 id="twenty-wh-apps-survive-most-abandoned-and-all-built-on-strangers">Twenty WH apps survive, most abandoned and all built on strangers</h2>
+<p>About <strong>20 dedicated WH-question apps are still listed in the US App Store</strong>, and most date from the 2011–2017 iPad era. Only a handful were updated in 2025–2026:</p>
+<ul>
+<li>Smarty Ears' WhQuestions (v8.4, February 2026) (<a href="https://apps.apple.com/us/app/whquestions/id348905092">App Store</a>).</li>
+<li>Teach Speech's Wh Questions. Its July 2026 release rewrote the code to fix lag, crashes and lost progress (<a href="https://apps.apple.com/us/app/wh-questions-by-teach-speech/id989346596">App Store</a>).</li>
+<li>"WH Questions: Why?" (<a href="https://apps.apple.com/us/app/wh-questions-why/id994495858">App Store</a>).</li>
+<li>Happy Frog's two WH titles (<a href="https://apps.apple.com/us/app/wh-questions-skills/id1055252994">App Store</a>).</li>
+<li>Two newcomers: Wh8 Kids, released September 2025 (<a href="https://apps.apple.com/us/app/wh8-kids-wh-questions-for-0-6/id6747709050">App Store</a>), and Question Clues, released October 2026 (<a href="https://apps.apple.com/us/app/question-clues/id6817815904">App Store</a>).</li>
+</ul>
+<p><strong>At least ten WH-specific titles still on sale were last updated in 2015–2017.</strong> They include all five Super Duper "Fun Deck" apps, the Autism iHelp WH apps, Grasshopper's WH Questions Preschool and WH Bingo. Some apps that therapists' roundups once recommended are gone. A lookup for QuestionIt by its App Store ID now returns nothing (<a href="https://itunes.apple.com/lookup?id=458737797&amp;country=us">iTunes Lookup</a>).</p>
+<p>The more important finding for this parent is how these apps teach "who". <strong>Almost every app treats "who" as "a person or a role" drawn from stock content.</strong> Super Duper's deck asks "WHO flies an airplane? …a pilot" (<a href="https://apps.apple.com/us/app/wh-question-cards/id515954148">App Store</a>). Hamaguchi asks "Who puts out fires?" (<a href="https://apps.apple.com/us/app/who-what-and-where-lite/id1535316519">App Store</a>). Grasshopper's preschool app asks "who is flying a kite?" over a picture of a boy and offers "a boy or a girl" as the choices (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1195753649/sortBy=mostRecent/json">App Store reviews</a>). For a young autistic child, picking out an anonymous pilot is a more abstract starting point than recognising Daddy.</p>
+<p><strong>No dedicated WH app builds its "who" items around the family's own photos.</strong> The nearest is Hamaguchi's Fun with Who, What &amp; Where, made by a licensed speech-language pathologist (SLP). It has a "Who vs. What" activity with a choice of 2–4 answer pictures. A fifth activity puts the child's uploaded face into eight animations, such as surfing or riding a bike, and asks WH-questions about them. It is iOS-only and has not been updated since October 2020 (<a href="https://apps.apple.com/us/app/who-what-and-where-lite/id1535316519">App Store</a>). Super Duper went the other way and removed the camera feature from WH Question Cards Pro in August 2024 (<a href="https://apps.apple.com/app/id544870563">App Store</a>).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr class="header">
+<th>App (developer)</th>
+<th>Price and platform</th>
+<th>Last update</th>
+<th>How it handles "who"</th>
+<th>Watch-outs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>WhQuestions (Smarty Ears)</td>
+<td>$19.99, iOS only</td>
+<td>Feb 2026</td>
+<td>400+ picture scenarios across all six WH-words. The child mostly answers aloud and an adult scores (<a href="https://apps.apple.com/us/app/whquestions/id348905092">App Store</a>)</td>
+<td>Reviewers asked for picture answer choices for "lower-level kiddos" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=348905092/sortBy=mostRecent/json">reviews</a>)</td>
+</tr>
+<tr class="even">
+<td>WH Question Cards / Pro (Super Duper)</td>
+<td>Free with the WHO deck plus in-app purchases; Pro $19.99; iOS</td>
+<td>Jan 2022 / Aug 2024</td>
+<td>56 illustrated cards per WH-word, e.g. occupations</td>
+<td>Rated 2.82 and 2.68; purchased decks vanish; camera feature removed (<a href="https://apps.apple.com/app/id544870563">App Store</a>)</td>
+</tr>
+<tr class="odd">
+<td>Wh Questions (Teach Speech)</td>
+<td>$2.99, iOS, no ads or in-app purchases</td>
+<td>Jul 2026</td>
+<td>"Identify the picture that answers the WH question" with professional photos, designed for use "side-by-side with an engaged adult" (<a href="https://apps.apple.com/us/app/wh-questions-by-teach-speech/id989346596">App Store</a>)</td>
+<td>Older complaints of a robotic voice and reading demands</td>
+</tr>
+<tr class="even">
+<td>WH Questions Skills / Answer &amp; Ask (Happy Frog)</td>
+<td>Free plus $2.99 unlock / $7.99; iOS</td>
+<td>Mar 2025</td>
+<td>Sentence-based. Starts with two choices and moves to four; the child is "always guided to the correct answer" (<a href="https://apps.apple.com/us/app/wh-questions-skills/id1055252994">App Store</a>)</td>
+<td>Text-heavy, built for reading comprehension</td>
+</tr>
+<tr class="odd">
+<td>WH Questions Preschool (Grasshopper)</td>
+<td>$2.99, iOS</td>
+<td>May 2017</td>
+<td>Cartoons with two generic-person choices</td>
+<td>Illogical wrong-answer choices and crashes (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1195753649/sortBy=mostRecent/json">reviews</a>)</td>
+</tr>
+<tr class="even">
+<td>Autism iHelp – WH Questions</td>
+<td>Free plus in-app purchases; SLP Edition $14.99; iOS</td>
+<td>Oct 2017</td>
+<td>Real photos as answer choices (<a href="https://apps.apple.com/us/app/autism-ihelp-wh-questions/id557548372">App Store</a>)</td>
+<td>Rated 2.52; paid sections lock again</td>
+</tr>
+<tr class="odd">
+<td>Fun with Who, What &amp; Where Lite (Hamaguchi)</td>
+<td>Free (full version $19.99 per developer); iOS</td>
+<td>Oct 2020</td>
+<td>"Who is on the bed?" vs "What is on the bed?"; child's face in animations</td>
+<td>Unmaintained for six years</td>
+</tr>
+<tr class="even">
+<td>Wh8 Kids (KITA Platform)</td>
+<td>Free plus in-app purchases; iOS and Android</td>
+<td>Nov 2026</td>
+<td>Illustrated cards for eight WH-words; difficulty adapts to performance; works offline (<a href="https://play.google.com/store/apps/details?id=com.kitaplatform.wh8kids">Google Play</a>)</td>
+<td>0 iOS ratings, 1K+ Android installs</td>
+</tr>
+<tr class="odd">
+<td>Question Clues (Julian Gomez)</td>
+<td>Free, no ads; iOS</td>
+<td>Nov 2026</td>
+<td>3 levels per WH-word, with feedback and a retry after a wrong answer</td>
+<td>Text-based; read-aloud only added in Nov 2026</td>
+</tr>
+<tr class="even">
+<td>WH questions for Kids (Olga Anisimova)</td>
+<td>Free with ads; Android</td>
+<td>Aug 2026</td>
+<td>Fully voiced, English and Russian (<a href="https://play.google.com/store/apps/details?id=com.olgam.whquestionsforkids">Google Play</a>)</td>
+<td>Rated 3.17; the only WH app found with ads</td>
+</tr>
+</tbody>
+</table></div>
+<p>Prices run <strong><span class="math inline">0.99–</span>24.99 one-time</strong>, or free with in-app purchases, and Question Clues is entirely free (<a href="https://apps.apple.com/us/app/wh-questions-bingo-app/id1200516665">WH Bingo</a>; <a href="https://apps.apple.com/us/app/language-empires/id562910097">Language Empires</a>). Android is barely served. Play Store searches found no listings for Smarty Ears, Teach Speech, Happy Frog, Autism iHelp or Super Duper's WH apps (<a href="https://play.google.com/store/search?q=wh+questions&amp;c=apps">Play search</a>).</p>
+<p>No listing claims that the app recognises the child's spoken answer. Spoken answers are either scored by an adult or recorded for the child to hear back. No listing describes a configurable sequence of hints, or a mastery rule such as "80% across three sessions". The usual data is session accuracy for each WH-word.</p>
+<p>Language support is mostly English. Super Duper offers Spanish, which reviewers report is broken (<a href="https://itunes.apple.com/us/rss/customerreviews/id=544870563/sortBy=mostRecent/json">reviews</a>), and WH Questions: Why? adds Spanish and Turkish.</p>
+<h2 id="big-platforms-and-aac-apps-each-solve-one-piece">Big platforms and AAC apps each solve one piece</h2>
+<p>Among the large autism platforms, only CARD's Camp Discovery has explicit WH content. Its lesson list includes "Wh-Discrimination" and "Community Helpers" (<a href="https://apps.apple.com/app/id1521799184">App Store</a>). It is also the only one with a peer-reviewed randomised controlled trial (RCT). That trial included 28 verbal autistic children aged about 2.5–9. Children who used the app straight away mastered <strong>58.1 targets, against 8.4 for children waiting their turn</strong> (d = 2.33). They learned about 4.5 targets per hour and kept the skills (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6411554">Novack et al., PMC6411554</a>).</p>
+<p>The caveats are significant. A research assistant sat in on every session. Nobody tested whether the skills carried over to daily life. The authors worked for CARD. The images were "either illustrations or photographs, depending on the lesson", all generic. The app has since decayed: it has 2.4 stars from 8 ratings, its last version shipped in May 2023, and 2025 reviews report security-certificate errors with only two modules accessible (<a href="https://apps.apple.com/app/id1521799184">App Store</a>).</p>
+<p>The commercial leaders skip WH-questions altogether:</p>
+<ul>
+<li><strong>Otsimo</strong> (4.3 stars, 637 ratings) offers 100+ games and an adaptive learning path. It describes no WH content, family photos or speech recognition. It charges from $9.99 a month to $164.99 a year, or $229.99 for life, and offline play needs the Premium tier (<a href="https://apps.apple.com/us/app/otsimo-special-education-1/id1084723774">App Store</a>). Common Sense Media notes that its directions are "given once, quickly, and can't be repeated" (<a href="https://www.commonsensemedia.org/app-reviews/otsimo-special-education-aac">Common Sense Media</a>).</li>
+<li><strong>Speech Blubs</strong> is the engagement leader, with <strong>4.6 stars from 60,000 ratings</strong>. It is a speech app built on videos of other children modelling words, and costs $14.99 a month or $59.99 a year. Its listing mentions no WH section (<a href="https://apps.apple.com/us/app/-/id1239522573">App Store</a>; <a href="https://speechblubs.com/faq/how-much-does-speech-blubs-cost">Speech Blubs FAQ</a>). Its research page offers a quality rating by therapists and a trial marked "in progress", not results showing it works (<a href="https://speechblubs.com/research">Speech Blubs research</a>).</li>
+<li><strong>Lingokids</strong> commissioned a study of autism use that covers social skills and routines, not WH-questions (<a href="https://lingokids.com/?p=43968">Lingokids blog</a>).</li>
+</ul>
+<p>AAC (augmentative and alternative communication) apps handle personalisation but not teaching:</p>
+<ul>
+<li><strong>Proloquo2Go</strong> costs $249.99 and has 4.8 stars from 12,000 ratings. Parents can photograph family members for buttons and record audio onto them (<a href="https://apps.apple.com/us/app/-/id308368164">App Store</a>; <a href="https://www.assistiveware.com/support/proloquo2go/organize/buttons/photo">AssistiveWare support</a>).</li>
+<li><strong>TouchChat HD</strong> costs $149.99 plus add-ons and does the same (<a href="https://apps.apple.com/app/id398860728">App Store</a>).</li>
+<li><strong>LAMP Words for Life</strong> costs $299.99 (<a href="https://apps.apple.com/app/id551215116">App Store</a>).</li>
+</ul>
+<p>These are communication boards: the child presses "Mummy" to say "Mummy". They are not trainers that ask "Who is eating?" and check the answer. The pricing reflects a market paid for mainly by insurers and schools rather than parents.</p>
+<p>The options narrow further for a family that speaks an Indian language at home. Avaz, from Chennai, has audio in Hindi, Marathi, Tamil, Telugu, Malayalam and Kannada, and lets families "use pictures and record your own voice in any language" (<a href="https://avazapp.freshdesk.com/support/solutions/articles/11000024972-in-what-languages-is-avaz-available-">Avaz support</a>). In Avaz India, though, the image text, keyboard and rest of the app stay in English (<a href="https://acecentre.org.uk/language-library/avaz-india">Ace Centre</a>). A lifetime licence costs Rs 11,999 (<a href="https://avazapp.freshdesk.com/support/solutions/articles/1000213047">Avaz support</a>). Jellow, from IIT Bombay's design school, is free and covers Hindi, Marathi, Bengali and Tamil (<a href="https://apps.apple.com/in/app/jellow-aac-communicator/id1456459072">App Store India</a>). Neither teaches WH-questions. Speech Blubs supports 16 languages besides English, none of them Indian. Otsimo supports English, French, German, Spanish and Turkish. A parent recording the question in their own voice gets around poor computer voices in Indian languages entirely.</p>
+<p>A determined parent can already improvise "Who is this?" with general flashcard builders:</p>
+<ul>
+<li><strong>Bitsboard</strong> (free, or $42.99 for PRO; 4.39 stars from 1,015 ratings) builds lessons from your own images and audio and runs games such as Photo Touch (<a href="https://apps.apple.com/us/app/bitsboard-flashcards-games/id516842210">App Store</a>).</li>
+<li><strong>ABA Cards</strong> builds drill-style flashcards from photos in the gallery (<a href="https://apps.apple.com/app/aba-cards/id1507765578">App Store</a>).</li>
+<li><strong>Tactus Language Therapy 4-in-1</strong> ($89.99) accepts your own words, pictures and sounds, but it is designed for adults with aphasia (<a href="https://apps.apple.com/us/app/language-therapy-4-in-1/id525278822">App Store</a>).</li>
+</ul>
+<p>None of these knows what a WH-question is. None separates "who" from "what", fades its help over time or tracks mastery.</p>
+<h2 id="reviewers-reward-real-photos-and-punish-broken-purchases">Reviewers reward real photos and punish broken purchases</h2>
+<p>Reviews praise the same things again and again:</p>
+<ul>
+<li><strong>Telling question words apart, with cues that fade.</strong> One SLP used Happy Frog with "LD and ASD kids… to distinguish between the types of WH questions". She started with written and pictured visuals and then gradually faded all cues (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1055252994/sortBy=mostRecent/json">App Store reviews</a>). Another praised its move from "a field of two" to "a field of four" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1055253477/sortBy=mostRecent/json">reviews</a>).</li>
+<li><strong>Good photos.</strong> A parent called Teach Speech "the best" of several WH apps because of its "high quality pictures" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=989346596/sortBy=mostRecent/json">reviews</a>).</li>
+<li><strong>Personal touches and simple rewards.</strong> An SLP called Hamaguchi's face-upload activity "especially clever" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1535316519/sortBy=mostRecent/json">reviews</a>). A parent of a 3-year-old on the spectrum said the child "loves" Grasshopper's sticker reward (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1195753649/sortBy=mostRecent/json">reviews</a>).</li>
+</ul>
+<p>Demand for "who" is stated outright. The parent of an autistic son asked the developer of WH Questions: Why? to "make what, who, when, and where questions next" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=994495858/sortBy=mostRecent/json">reviews</a>).</p>
+<p>The complaints fall into five patterns:</p>
+<ul>
+<li><strong>Broken purchases.</strong> These top the one-star reviews. Super Duper buyers report decks that "disappeared" after changing iPads, and in November 2026 one was "never able to access anything I purchased" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=515954148/sortBy=mostRecent/json">reviews</a>). Autism iHelp users report paid sections locking again, with "No support" (<a href="https://itunes.apple.com/us/rss/customerreviews/id=557548372/sortBy=mostRecent/json">reviews</a>).</li>
+<li><strong>Illogical wrong-answer choices.</strong> Grasshopper asks "what do you ride?" with a horse and a car as choices ("Technically you ride both"). It asks "where does a bird live?" with a bird and a cage (<a href="https://itunes.apple.com/us/rss/customerreviews/id=1195753649/sortBy=mostRecent/json">reviews</a>).</li>
+<li><strong>Robotic or monotone voices</strong> (<a href="https://itunes.apple.com/us/rss/customerreviews/id=989346596/sortBy=mostRecent/json">Teach Speech reviews</a>; <a href="https://itunes.apple.com/us/rss/customerreviews/id=364823150/sortBy=mostRecent/json">Question Builder reviews</a>).</li>
+<li><strong>Reading demands that shut out the intended users.</strong> One reviewer called Teach Speech "useless to special needs students" because it required reading.</li>
+<li><strong>Testing without teaching.</strong> Reviewers wrote "All trial and error. No actual teaching" about Happy Frog and "No scaffolding of skills" about WH Questions: Why? (<a href="https://itunes.apple.com/us/rss/customerreviews/id=994495858/sortBy=mostRecent/json">reviews</a>).</li>
+</ul>
+<p>On the big platforms, cost and subscription tactics dominate the complaints. Speech Blubs reviewers say it is "not worth $100 per device" and describe a duplicate lifetime charge whose refund was declined (<a href="https://apps.apple.com/us/app/-/id1239522573">App Store</a>). Speech Blubs refunds automatically only within 3 days of purchase (<a href="https://speechblubs.com/legal/en/refund-policy">refund policy</a>). An Otsimo Speech user describes a free week followed by a charge that was not refunded (<a href="https://play.google.com/store/apps/details?id=com.otsimo.speech">Google Play</a>). A Proloquo2Go reviewer calls its price a "hard pill to swallow" (<a href="https://apps.apple.com/us/app/-/id308368164">App Store</a>).</p>
+<p>Treat this sentiment with care. Reddit and private parent Facebook groups could not be searched, so these voices come from app-store reviews, which skew to extremes. Most WH apps have fewer than 30 ratings. Some praise looks clustered: five 5-star Teach Speech reviews are all dated 4 July 2026, the day of its update (<a href="https://itunes.apple.com/us/rss/customerreviews/id=989346596/sortBy=mostRecent/json">reviews</a>). Scattered critical reviews deserve more weight.</p>
+<p>Put together, the gap is specific. <strong>No maintained app offers all of the following:</strong></p>
+<ul>
+<li>the family's own photos;</li>
+<li>the parent's recorded voice in the home language;</li>
+<li>a tap-to-answer format;</li>
+<li>a stage that separates "who" from "what";</li>
+<li>help that fades systematically;</li>
+<li>a mastery rule;</li>
+<li>iOS and Android versions that work offline, without ads or a subscription.</li>
+</ul>
+<p>Each piece exists somewhere. Hamaguchi shows that parents and therapists like seeing the child's own face, and AAC apps show that capturing family photos is technically routine. With competitors rated between 2.5 and 4.3 stars on tiny rating counts, a reliable, maintained app does not need to be extraordinary to stand out.</p>
+<h2 id="clinicians-back-short-shared-practice-that-ends-in-real-life">Clinicians back short, shared practice that ends in real life</h2>
+<h3 id="who-arrives-around-age-three-and-later-in-autism">"Who" arrives around age three, and later in autism</h3>
+<p>CDC milestones describe what at least 75% of children can do by a given age. By 3 years, most children ask "who", "what", "where" or "why" questions and can say what action is happening in a picture, such as "running" or "eating" (<a href="https://www.cdc.gov/act-early/milestones/3-years.html">CDC</a>). A university clinic handout based on ASHA norms places answering simple who/what/where questions at 3–4 years (<a href="https://www.fhsu.edu/commdis/herndon-clinic/milestones-handout-b-5.pdf">FHSU handout</a>). "Where" comes first: at 13–18 months a child looks around when asked "Where's your blanket?" (<a href="https://www.readingrockets.org/topics/speech-language-and-hearing/articles/what-expect-your-childs-communication-development-birth">Reading Rockets, ASHA chart</a>).</p>
+<p>Autistic children follow the same order on a slower clock. In a three-year study with home visits, typically developing toddlers understood WH-questions by about <strong>29 months</strong>. The autistic group did so only at about <strong>54 months</strong>, once their language had caught up to a similar level (an average utterance of about two words). In both groups, understanding came before asking (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3329597">Goodwin, Fein &amp; Naigles 2012</a>). Later work found that both grammar (knowledge of word order) and social understanding independently predicted later WH-question comprehension (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5344911">Jyotishi et al. 2017</a>).</p>
+<p><strong>Language level, not age, is the readiness signal.</strong> A child is ready for "Who is eating?" if he reliably:</p>
+<ul>
+<li>looks at or points to family members when they are named;</li>
+<li>recognises them in photos;</li>
+<li>understands a few action words such as "eating".</li>
+</ul>
+<p>These prerequisites are inferred from the milestone sequence; no guideline states them.</p>
+<p>One finding pushes back on the working idea. The same research group studied how mothers spoke to their children. In autistic children, questions built on "is" ("What's this?", "Who is that?") predicted <em>weaker</em> WH comprehension. In typically developing children, questions built around action words predicted stronger comprehension (<a href="https://pubmed.ncbi.nlm.nih.gov/24461930/">Goodwin et al. 2015</a>). It is one correlational study and does not show that "Who is this?" is harmful. It is still a reason to move quickly from "Who is this?" to action questions such as "Who is eating?" and "Who is sleeping?".</p>
+<p>A slow start is not a verdict. The AAP notes that phrase speech can emerge as late as age 10 in children with good nonverbal skills and social engagement (<a href="https://depts.washington.edu/dbpeds/ID.Eval.Mgt.Children.ASD(AAP.2020).pdf">AAP 2020</a>). Parents will also meet "gestalt language processing" as an explanation for echolalia, the repeating of heard phrases. A 2024 critical review concluded that "evidence is lacking that GLP represents a legitimate clinical entity". It did endorse many of the responsive practices GLP promotes (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11113044">Hutchins et al. 2024</a>).</p>
+<h3 id="screen-guidance-converges-from-age-two-about-an-hour-or-less-together">Screen guidance converges: from age two, about an hour or less, together</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr class="header">
+<th>Body</th>
+<th>Under 2</th>
+<th>Ages 2–5</th>
+<th>Condition that matters most</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AAP 2016</td>
+<td>Avoid entirely under 18–24 months, except video chat</td>
+<td>About 1 hour a day of high-quality content</td>
+<td>"Parents should engage with the media alongside their children" (<a href="https://sph.washington.edu/news-events/news/updated-digital-media-guidelines-address-growing-impact-child-health">UW summary</a>)</td>
+</tr>
+<tr class="even">
+<td>WHO 2019</td>
+<td>Not recommended</td>
+<td>No more than 1 hour of sitting screen time; "less is better"</td>
+<td>Reading and storytelling with a caregiver encouraged (<a href="https://www.who.int/news/item/24-04-2019-to-grow-up-healthy-children-need-to-sit-less-and-play-more">WHO</a>)</td>
+</tr>
+<tr class="odd">
+<td>Canadian Paediatric Society 2023</td>
+<td>Not recommended apart from video chat</td>
+<td>About 1 hour or less</td>
+<td>Watch together; no screens in the hour before bed (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10186096">CPS</a>)</td>
+</tr>
+<tr class="even">
+<td>Indian Academy of Pediatrics 2022</td>
+<td>No screens; "minimal and occasional" video calls with distant family</td>
+<td>At most 1 hour, each session no more than 20–30 minutes, "the lesser, the better"</td>
+<td>"Always supervised"; shared use; educational and "preferably interactive" (<a href="https://www.indianpediatrics.net/mar2022/235.pdf">IAP</a>)</td>
+</tr>
+<tr class="odd">
+<td>AAP 2026</td>
+<td>Under 18 months learn best from real-world interaction</td>
+<td>No hour limit on the parent explainer; focus on quality, context and co-use</td>
+<td>Avoid design built to keep children playing (<a href="https://www.contemporarypediatrics.com/view/aap-calls-for-system-level-changes-to-improve-children-s-digital-media-environments">Contemporary Pediatrics</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The AAP's January 2026 policy statement, led by developmental-behavioural paediatrician Tiffany Munzer, changes the question. It says children's media use "cannot be viewed solely through the lens of individual child behaviors or screen limits alone". It says joint media engagement is associated with improved learning. It contrasts child-centred design with <strong>design built to maximise engagement</strong>: autoplay, endless scroll, and "behavioral reinforcers" that prolong use and undermine the child's own control (<a href="https://www.contemporarypediatrics.com/view/aap-calls-for-system-level-changes-to-improve-children-s-digital-media-environments">Contemporary Pediatrics</a>). Munzer's explainer for parents urges families to "move beyond simple screen-time limits and focus on quality, context and conversation". It singles out apps "rewarding kids just for signing in" (<a href="https://www.healthychildren.org/English/family-life/Media/Pages/helping-kids-thrive-in-a-digital-world-AAP-policy-explained.aspx">HealthyChildren.org</a>). Whether the 2016 one-hour cap formally survives is unclear: secondary sources conflict, and the full text could not be retrieved.</p>
+<p>The IAP guideline also summarises the Indian Psychiatric Society's position. For children aged 2–5, screens are acceptable "for specific purposes like educational games or teaching aid", in sessions of no more than 30 minutes, no more than twice a day, used together with an adult (<a href="https://www.indianpediatrics.net/mar2022/235.pdf">IAP 2022</a>). That describes this app closely. Every body rules out screens at meals, in the hour before bed, and as a way to calm a distressed child. The AAP advises a shared family device rather than a personal tablet for young children (<a href="https://www.healthychildren.org/English/family-life/Media/Pages/helping-kids-thrive-in-a-digital-world-AAP-policy-explained.aspx">HealthyChildren.org</a>).</p>
+<p>No professional body sets separate screen limits for autistic children. The Canadian Paediatric Society notes that the behavioural effects of screens are "more pronounced in children with special neurodevelopmental needs" (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10186096">CPS 2023</a>). The closest thing to autism-specific advice is an AAP-published article by developmental-behavioural paediatrician Jenny Radesky (<a href="https://www.healthychildren.org/English/tips-tools/ask-the-pediatrician/Pages/How-should-I-handle-my-child%e2%80%99s-media-use-autism-spectrum-disorder.aspx">HealthyChildren.org</a>). She advises:</p>
+<ul>
+<li>making media "a shared experience, rather than something kids do alone";</li>
+<li>avoiding auto-advance features, which "are specifically designed to keep kids playing longer";</li>
+<li>dropping any app that makes a child "more active, aggressive, or self-stimulatory".</li>
+</ul>
+<p>The risks of screens are real but narrower than the headlines suggest:</p>
+<ul>
+<li><strong>Language.</strong> A meta-analysis of 42 studies (18,905 children) linked more screen time to poorer language (r = −0.14). It linked <strong>watching together (r = +0.16) and educational content (r = +0.13) to better language</strong> (<a href="https://pubmed.ncbi.nlm.nih.gov/32202633/">Madigan et al. 2020</a>).</li>
+<li><strong>Less talk at home.</strong> All-day audio recordings in 220 Australian families showed screen time displacing parent-child talk, most of all at 36 months (<a href="https://pubmed.ncbi.nlm.nih.gov/38436942/">Brushe et al. 2024</a>).</li>
+<li><strong>Learning from video.</strong> Young children learn about half a standard deviation less from video than face to face, a gap that shrinks with age (<a href="https://pubmed.ncbi.nlm.nih.gov/33491209/">Strouse &amp; Samson 2021</a>).</li>
+<li><strong>Autism.</strong> Screens do not cause autism on current evidence. A meta-analysis of 46 studies found the link was no longer significant after correcting for publication bias, and noted that autistic children may simply gravitate to screens (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10709772/">Ophir et al. 2023</a>). Autism researchers in 2026 urged replacing "virtual autism" with "screen-related developmental delay", because the older term revives parental blame (<a href="https://doi.org/10.1177/13623613261434478">Krijnen et al. 2026</a>).</li>
+</ul>
+<p>The danger lies in solo, passive use that crowds out talk, and a co-played app avoids exactly that.</p>
+<h3 id="apps-teach-single-skills-but-rarely-change-everyday-talk">Apps teach single skills but rarely change everyday talk</h3>
+<p>The AAP's 2020 clinical report on autism grounds effective treatment in applied behaviour analysis (ABA) principles and naturalistic developmental behavioural interventions (NDBIs). It notes that <strong>"More RCTs have been published on parent-mediated therapies than on other nonpharmacologic interventions"</strong>. Services "may involve technology-assisted intervention". On AAC, it says it "does not delay onset of speech" and "may enhance emergence of spoken words", but warns that "It cannot be assumed that the use of AAC alone will lead to functional oral communication without a therapeutic plan". It lists what to look for in any intervention: individualised measurable goals, methods to "build, generalize, and maintain skills", rewards drawn from the child's interests, and providers working together (<a href="https://depts.washington.edu/dbpeds/ID.Eval.Mgt.Children.ASD(AAP.2020).pdf">AAP 2020</a>).</p>
+<p>Technology-aided instruction counts as an evidence-based practice under the US National Clearinghouse on Autism Evidence and Practice. It met the criteria with 17 single-case and 26 group studies, and works for ages 0–2 and 3–5, including on communication (<a href="https://afirm.fpg.unc.edu/wp-content/uploads/Technology-Aided-Instruction-Intervention-Brief-Packet-Hedges-AFIRM-Team-Updated-2025.pdf">AFIRM TAII brief</a>). That status covers technology used inside planned, systematic teaching, not apps in general.</p>
+<p>Head-to-head evidence is sobering. A 2024 systematic review of 13 tablet and computer vocabulary studies found five positive, six mixed, one negative and one null result. The null result came from a trial of 154 children. In one comparison children learned faster with paper flashcards, and in another an iPad did no better than picture books (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11137377/">Urrea et al. 2024</a>). The clearest warning is the FindMe iPad app trial with 54 autistic children under six. The children engaged with it and parents rated it highly, yet it produced <strong>no group differences in social communication or parent-child play</strong> (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5015758">Fletcher-Watson et al. 2016</a>).</p>
+<p>Technology works better inside adult-led interaction. When a speech-generating device was added to adult-led naturalistic therapy for 61 minimally verbal children aged 5–8, spontaneous communication improved (<a href="https://pubmed.ncbi.nlm.nih.gov/24839882/">Kasari et al. 2014</a>). In tablet vocabulary studies, gains carried over to new settings when parents or teachers, rather than researchers, gave the prompts (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11137377/">Urrea et al. 2024</a>).</p>
+<p>On photos, colour photographs beat black-and-white cartoons for word retention, at 1.88 against 1.28 out of 4 (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8349349/">Carter &amp; Hartley 2021</a>). But <strong>no controlled study has compared family photos with generic ones</strong>, and no RCT has tested an app that teaches WH-questions to autistic preschoolers.</p>
+<h3 id="single-case-research-supplies-a-tested-teaching-recipe">Single-case research supplies a tested teaching recipe</h3>
+<p>Behavioural methods reliably teach children to answer WH-questions. The evidence comes almost entirely from single-case designs; no RCT targets WH-question teaching specifically.</p>
+<p><strong>Generalisation has to be planned.</strong></p>
+<ul>
+<li><strong>Picture-based training carried over only to what the child could see.</strong> In a 1989 study, autistic students trained with pictures answered new questions when the relevant cue was visible. Questions about things out of view needed separate teaching (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1286168/">Secan, Egel &amp; Tilley 1989</a>).</li>
+<li><strong>Many different examples helped.</strong> Training with many examples sharing one sentence frame let five autistic children answer new questions, and the skill carried over across people and settings (<a href="https://www.researchgate.net/publication/222874784_Teaching_children_with_autism_to_answer_novel_wh-questions_by_utilizing_a_multiple_exemplar_strategy">Jahr 2001</a>).</li>
+<li><strong>Transfer is not automatic.</strong> In one dissertation only two of six students transferred the skill to new questions (<a href="https://drum.lib.umd.edu/bitstream/1903/6833/1/umi-umd-4321.pdf">Barthold 2007</a>). In one study within a review of 21 studies on asking questions, learning "who" did not transfer to "what" (<a href="https://www.sciencedirect.com/science/article/pii/S1750946713000597">Raulston et al. 2013</a>).</li>
+</ul>
+<p><strong>How to help matters.</strong></p>
+<ul>
+<li><strong>Picture hints beat spoken ones.</strong> Three autistic 4-year-olds reached criterion in fewer trials with picture hints than with spoken hints (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3177351">Ingvarsson &amp; Hollobaugh 2011</a>).</li>
+<li><strong>A pause before the hint cuts echoing.</strong> "Cues-pause-point" teaching (cue the child to stay quiet, ask, pause, then point to the answer) replaced echoed questions with correct answers (<a href="https://pure.psu.edu/en/publications/cuespausepoint-language-training-teaching-echolalics-functional-u/">Penn State record</a>).</li>
+<li><strong>Delay the hint gradually.</strong> Waiting progressively longer before giving a hint ("progressive time delay") is efficient and produces few errors. Delays usually rise 1–2 seconds at a time to a maximum of 5–10 seconds (<a href="https://link.springer.com/article/10.1007/s10864-020-09407-0">J. Behavioral Education 2020</a>; <a href="https://www.unr.edu/ndsip/services/resources/tips/progressive-time-delay-prompting">UNR tip sheet</a>).</li>
+<li><strong>Errorless learning and correcting mistakes both work.</strong> In an RCT of 28 autistic children, both mastered most target sets (97.6% against 95.2%). Correcting mistakes produced higher scores on the final test (85.7% against 77.1%) (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7343685">Leaf et al. 2020</a>).</li>
+</ul>
+<p><strong>Choice-screen design for tap-the-picture tasks</strong> (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3680153">Grow &amp; LeBlanc 2013</a>):</p>
+<ul>
+<li><strong>Avoid two-picture choices.</strong> A child who always taps one side is rewarded half the time, so use at least three.</li>
+<li><strong>Rotate the correct answer's position</strong> evenly across trials.</li>
+<li><strong>Save the best rewards for unprompted answers.</strong></li>
+<li><strong>Strip out accidental cues</strong> such as a glance or a stressed word.</li>
+</ul>
+<p><strong>Mastery rules.</strong> "80% across three sessions" is common in practice but often fails to make skills last. 100% works best, and only 41% of studies even checked whether skills were kept later (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7314871">McDougale et al. 2020</a>).</p>
+<h2 id="four-changes-turn-the-working-idea-into-a-teaching-tool">Four changes turn the working idea into a teaching tool</h2>
+<p>The parent's instinct (real family photos, a spoken question, picture choices, a celebration) matches the core of picture-based question teaching, and the family-photo angle is the open niche. As sketched, though, it repeats weaknesses that reviewers and researchers have already identified. A two-choice screen rewards guessing. A celebration for every correct tap rewards helped and unhelped answers alike. A drill that only ever asks "who" lets a child answer "Who is eating?" by listening for "eating" alone. The table sets out what to build instead. The numbers are reasoned defaults from general teaching research, not values tested in a "who" app, so make them adjustable.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Working idea</th>
+<th>Build instead</th>
+<th>Evidence anchor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Photos</td>
+<td>Family photos</td>
+<td>Five or more photos of each person, in different clothes, rooms and lighting, so the child learns the person rather than one picture. Later add a few regular non-family people, such as a teacher</td>
+<td><a href="https://www.researchgate.net/publication/222874784_Teaching_children_with_autism_to_answer_novel_wh-questions_by_utilizing_a_multiple_exemplar_strategy">Jahr 2001</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8349349/">Carter &amp; Hartley</a></td>
+</tr>
+<tr class="even">
+<td>First question</td>
+<td>"Who is this?" with picture choices</td>
+<td>Start with "Where's Daddy?" / "Touch Daddy" over a choice of faces. A true "Who is this?" shows one photo and offers name buttons in the parent's voice, or a "say it" mode the parent scores</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3680153">Grow &amp; LeBlanc</a></td>
+</tr>
+<tr class="odd">
+<td>Action "who"</td>
+<td>"Who is eating?"</td>
+<td>Two or three people, each doing a <em>different</em> action, across many actions (eating, sleeping, hugging, driving)</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1286168/">Secan 1989</a></td>
+</tr>
+<tr class="even">
+<td>Number of choices</td>
+<td>Two pictures</td>
+<td>Three from the start. If two are used briefly, alternate sides strictly with no more than two in a row on one side. Randomise position and flag a side bias (for example, over 70% of taps on one side)</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3680153">Grow &amp; LeBlanc</a></td>
+</tr>
+<tr class="odd">
+<td>Telling question words apart</td>
+<td>Not in the plan</td>
+<td>Mix "Who is eating?" with "What is Daddy eating?" on the same photo, with people <em>and</em> objects among the choices</td>
+<td><a href="https://www.sciencedirect.com/science/article/pii/S1750946713000597">Raulston 2013</a></td>
+</tr>
+<tr class="even">
+<td>Help</td>
+<td>Not in the plan</td>
+<td>Show the answer immediately at first (enlarge the correct photo, or the parent's voice says only "Daddy"). Then lengthen the wait about 1 second at a time up to 4–5 seconds, and shrink the help itself</td>
+<td><a href="https://link.springer.com/article/10.1007/s10864-020-09407-0">JBE 2020</a>; <a href="https://pure.psu.edu/en/publications/cuespausepoint-language-training-teaching-echolalics-functional-u/">cues-pause-point</a></td>
+</tr>
+<tr class="odd">
+<td>Celebration</td>
+<td>Celebrate every correct answer</td>
+<td>A 3–5 second celebration of the child's favourite only for unprompted correct taps. A brief "Yes, Daddy" for helped taps. No buzzer or red X for errors: repeat the question with the answer shown. Celebrate less often once he is reliable</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3680153">Grow &amp; LeBlanc</a>; <a href="https://www.contemporarypediatrics.com/view/aap-calls-for-system-level-changes-to-improve-children-s-digital-media-environments">AAP 2026</a></td>
+</tr>
+<tr class="even">
+<td>Voice</td>
+<td>Read aloud</td>
+<td>The parent's recorded voice in the home language, said the same way every time, with no stress on the answer</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3680153">Grow &amp; LeBlanc</a></td>
+</tr>
+<tr class="odd">
+<td>Mastery</td>
+<td>Not in the plan</td>
+<td>90% or more unprompted across two sessions before moving on. Re-check mastered items after 1, 2 and 4 weeks. Step back one stage if he scores under about 60% twice in a row</td>
+<td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7314871">McDougale 2020</a></td>
+</tr>
+<tr class="even">
+<td>Session</td>
+<td>Not in the plan</td>
+<td>About 10 questions, a visible progress strip and a clear "all done" screen, with no automatic next round</td>
+<td><a href="https://www.indianpediatrics.net/mar2022/235.pdf">IAP 2022</a>; <a href="https://www.healthychildren.org/English/tips-tools/ask-the-pediatrician/Pages/How-should-I-handle-my-child%e2%80%99s-media-use-autism-spectrum-disorder.aspx">Radesky</a></td>
+</tr>
+</tbody>
+</table></div>
+<figure class="mock" aria-label="Sketch of the recommended question screen">
+  <div class="screen">
+    <p class="screen-q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 10v4h4l5 4V6l-5 4z" fill="currentColor"/>
+        <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none"/>
+      </svg>
+      "Who is eating?"
+    </p>
+    <div class="choices">
+      <div class="choice">
+        <svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="24" r="11" fill="currentColor"/><path d="M14 64c2-14 11-22 22-22s20 8 22 22z" fill="currentColor"/></svg>
+        <span>Grandma, sleeping</span>
+      </div>
+      <div class="choice is-answer">
+        <svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="24" r="11" fill="currentColor"/><path d="M14 64c2-14 11-22 22-22s20 8 22 22z" fill="currentColor"/></svg>
+        <span>Daddy, eating</span>
+      </div>
+      <div class="choice">
+        <svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="24" r="11" fill="currentColor"/><path d="M14 64c2-14 11-22 22-22s20 8 22 22z" fill="currentColor"/></svg>
+        <span>Mummy, reading</span>
+      </div>
+    </div>
+    <div class="dots" aria-label="Question 4 of 10"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="screen-note">Shown at the start, with help on</p>
+  </div>
+  <figcaption>
+    <p>What the sketch shows</p>
+    <ul>
+      <li>Three photo choices of the same size and frame, each person doing a different action.</li>
+      <li>The correct photo moves to a different position from question to question.</li>
+      <li>At first the correct photo is shown bigger, as help. The app then waits a little longer each time before helping.</li>
+      <li>A mistake gets no buzzer or red X. The question repeats with the answer shown.</li>
+      <li>About 10 questions per session, with a progress strip and an "All done" screen.</li>
+    </ul>
+  </figcaption>
+</figure>
+
+<h3 id="sequence-the-lessons-from-touch-daddy-to-who-versus-what">Sequence the lessons from "Touch Daddy" to "who versus what"</h3>
+<p><strong>Set-up.</strong> The parent picks two to four very familiar people, adds several varied photos of each, and chooses a reward the child loves. A short clip of that family member waving or saying the child's name makes a fitting one.</p>
+<p><strong>Stage 1: finding the named person.</strong> The app says "Where's Daddy?" over three faces. Strictly, this is the listening version of the skill. The speaking version, a single photo with "Who is this?", should follow quickly. The child answers by tapping a name button or by speaking while the parent scores. Researchers have not established whether tapping a picture leads to <em>saying</em> the answer, so the app should let the parent check.</p>
+<p><strong>Stage 2: action questions.</strong> "Who is eating?" over people doing different things. The Goodwin finding suggests not lingering on "Who is this?".</p>
+<p><strong>Stage 3: mixing question words. This is the critical stage.</strong> It mixes "who" and "what" questions on the same scene, so the child must use the question word to choose between a person and an object. Without it, the app cannot tell whether he understands "who" or is simply matching the action word. Optional colour-coded icons can help here and then fade: a face outline for "who", an object outline for "what". "Where is Daddy?" can come after that.</p>
+<p><strong>Checking for carry-over.</strong> The app should regularly show never-seen photos of the same people, with no help or reward, and report the results separately. These checks show whether the child has learned the people or just the pictures.</p>
+<p><strong>Later.</strong> Questions about events the child didn't see ("Who picked you up today?") need separate teaching, as Secan found. An "I don't know, tell me" button gives him an honest answer instead of a guess or an echo (<a href="https://ncaep.fpg.unc.edu/resource/acquisition-of-intraverbal-behavior-teaching-children-with-autism-to-mand-for-answers-to-questions/">Ingvarsson &amp; Hollobaugh 2010</a>).</p>
+<h3 id="make-the-celebration-teach-not-hook">Make the celebration teach, not hook</h3>
+<p>Celebrating correct answers is standard practice. The AAP's 2020 report endorses using "the child's interests and preferences in determining reinforcement systems" (<a href="https://depts.washington.edu/dbpeds/ID.Eval.Mgt.Children.ASD(AAP.2020).pdf">AAP 2020</a>). What the AAP's 2026 statement attacks is reinforcement used to prolong use. The line falls between a brief, consistent reward tied to a correct answer within a short, finite session, and features that pull the child back in: streaks, unlockable levels, rewards that grow bigger over time, "one more round" prompts and autoplay into the next set.</p>
+<p>The reward should be calm: 3–5 seconds, consistent, with volume the parent can adjust or mute, and no sudden loud sounds. A buzzer for errors serves no purpose. The research on keeping errors rare and correcting them gently points to replaying the question with the answer shown. If the app leaves the child more agitated or more absorbed in self-stimulation, Radesky's advice applies: take it out of rotation.</p>
+<h3 id="build-the-parent-not-just-the-child-into-the-app">Build the parent, not just the child, into the app</h3>
+<p>The evidence is consistent here. Apps used alone don't move everyday communication, while adult-delivered prompts do carry over. So the parent is the most important part of the app.</p>
+<p><strong>Co-play mode.</strong> The parent sits with the child, can replay the question, and controls when the session ends.</p>
+<p><strong>"Ask it today" cards.</strong> After each session, the app suggests real-life practice. For example: "At dinner, ask 'Who is eating?' Wait 3 seconds. If needed, point to Dad and say 'Daddy'." The real-life question is the goal, and the app is rehearsal for it.</p>
+<p><strong>In-app photo capture.</strong> Parents can photograph daily routines ("Grandma reading") straight into the app, so the pictures keep matching the child's real day.</p>
+<p><strong>Lock-down and layout.</strong> A child-proof mode (Guided Access on iPad) and a parent gate keep the child out of settings. Each screen shows one task on a plain background. All photo choices are the same size, frame and brightness, at least about 2 × 2 cm (<a href="https://www.nngroup.com/articles/children-ux-physical-development/">Nielsen Norman Group</a>). The child sees no menus, and the layout never changes (<a href="https://www.w3.org/TR/coga-usable">W3C cognitive accessibility guidance</a>). Before relying on the app, check that the child can tap a target accurately on his own (<a href="https://afirm.fpg.unc.edu/wp-content/uploads/Technology-Aided-Instruction-Intervention-Brief-Packet-Hedges-AFIRM-Team-Updated-2025.pdf">AFIRM TAII brief</a>).</p>
+<p><strong>Parent dashboard</strong>, stored on the device. It should show:</p>
+<ul>
+<li>unprompted versus prompted accuracy for each person and stage;</li>
+<li>the side-bias flag;</li>
+<li>the current hint delay;</li>
+<li>mastery dates;</li>
+<li>results from re-checks and from new-photo checks.</li>
+</ul>
+<p><strong>Share the data.</strong> Show the dashboard to the child's speech therapist or behaviour analyst (BCBA) so the app's targets match therapy goals. The AAP's list of what good intervention includes asks that multiple providers "work collaboratively". Parent reports of a child's "who" questions have proved accurate when checked against observed speech (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5266545">Jyotishi et al. 2017</a>), so the parent's own records are credible to clinicians.</p>
+<p><strong>AAC.</strong> If the child doesn't yet speak, pairing the app with AAC is fine. It will not hold back speech.</p>
+<p><strong>When to use it.</strong> Run the app on a parent's phone or a shared tablet, never at meals or bedtime, and never to calm distress.</p>
+<h3 id="keep-the-photos-on-the-phone-and-the-claims-modest">Keep the photos on the phone and the claims modest</h3>
+<p>Photos and voice recordings of a child count as personal data under every major privacy regime. The amended US children's privacy rule (COPPA, effective June 2025, with most compliance due by 22 April 2026) adds biometric identifiers such as facial templates (<a href="https://www.govinfo.gov/content/pkg/FR-2025-04-22/html/2025-05904.htm">Federal Register</a>). Under EU and UK data law (GDPR Article 8), a parent must give or authorise consent for online services offered to children under 16, or under 13 where a country lowers the age, as the UK does (<a href="https://www.legislation.gov.uk/eur/2016/679/article/8">legislation.gov.uk</a>). India's data protection rules (DPDP Rule 10) require verifiable parental consent before processing a child's data (<a href="https://dpdpa.com/dpdparules/rule10.html">DPDP Rule 10</a>). The DPDP Act excludes purely personal or domestic processing, and its core obligations start around May 2027 (<a href="https://www.hoganlovells.com/en/publications/indias-digital-personal-data-protection-act-2023-brought-into-force-">Hogan Lovells</a>).</p>
+<p>An app built only for the family's own child, with everything stored on the family's device, likely falls inside that domestic exclusion; a lawyer should confirm this. The safe defaults are the same either way: no account, no cloud sync, no analytics tools, no ads, no face recognition, and one "delete everything" button. If the app is ever shared with other families, add a consent flow and a privacy notice that says how long data is kept.</p>
+<p>Marketing claims should stay modest. No autism therapy app had FDA authorisation as of November 2026, so words such as "therapy" or "treatment" invite scrutiny that a small app cannot back up.</p>
+<p>If the parent publishes the app, the review record shows where the bar sits:</p>
+<ul>
+<li>a one-time price or free, never a subscription;</li>
+<li>purchases that survive a device change;</li>
+<li>an Android version;</li>
+<li>natural recorded voices instead of computer speech;</li>
+<li>wrong-answer choices that are clearly wrong;</li>
+<li>no reading required.</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Family photos are not the hard part; AAC apps have handled them for years. The opportunity is to pair family photos with the teaching rigour that the old therapist apps half-built and then abandoned: three-choice screens, help that fades, a stage that mixes "who" with "what", and mastery rules with re-checks. The parent's biggest advantage over any commercial developer is being in the room. The trial evidence says that a child's engagement with an app does not carry over to daily life on its own, while help from a parent does. So the app's most valuable feature may be the "Ask it today" card, not the celebration animation. Success should be measured by whether the child answers "Who is eating?" at the dinner table, not by his accuracy in the app.</p>
+<p>Three questions remain open, and the app itself can help answer them for this child:</p>
+<ul>
+<li><strong>Do family photos beat stock pictures?</strong> No study has compared them.</li>
+<li><strong>Does tapping the right photo lead to saying the name?</strong> Nobody has shown this.</li>
+<li><strong>Will learning on family faces extend to teachers and therapists?</strong> Unknown.</li>
+</ul>
+<p>New-photo checks, a parent-scored "say it" mode and a few non-family faces would turn each question into data that the parent and the child's speech therapist can review together. If the child is under two, every guideline body would put this same game in a printed photo album rather than on a screen.</p>
+
+  </article>
+
+  <footer class="foot">
+    <p>Compiled on 26 November 2026 from app-store listings, professional guidelines and published studies. App prices are US App Store prices unless another currency is shown. It is a research summary, not a substitute for advice from his paediatrician or speech therapist.</p>
+  </footer>
+</main>
